@@ -39,10 +39,13 @@ Recommended: connect the GitHub repo in Vercel so pushes to `main` auto-deploy.
 8. **Analytics** — Vercel Web Analytics (free) or Plausible; track inquiry conversions.
 9. Brand pass (logo, art direction), accessibility audit, legal pages.
 
+## Decisions
+- **Oct 15, 2026 (Henry):** esports teams/orgs and game studios are represented as **talent on the roster**, not clients. Roster categories: *Esports Teams & Orgs* (Esports & Pro Gaming) and *Indie Game Developers & Studios* (Game Development Talent). For Brands targets publishers, media companies, conventions and consumer brands.
+
 ## Open questions
 - Final domain? Business email? Legal entity & state licensing (CA Talent Agencies Act if booking employment)?
 - Which existing Notion rosters (cosplay/creator) are signed vs research-only? (Treat as research only until confirmed.)
 - Commission model and which divisions/categories to launch first (135 is the map, not the launch scope).
-- Esports teams/orgs and game studios: represent as clients or as talent?
+
 - Should adult-content creator rosters be kept separate from the public brand?
 - Use Next.js or keep static until roster exists?
