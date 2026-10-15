@@ -3,14 +3,13 @@ from taxonomy import T
 slug=lambda s:re.sub(r'[^a-z0-9]+','-',s.lower()).strip('-')
 e=html.escape
 nd=len(T);nc=sum(len(c) for _,_,c in T)
-chips='<button class="chip on" data-d="all">All</button>'+"".join(f'<button class="chip" data-d="{slug(d)}">{ic} {e(d)}</button>' for d,ic,_ in T)
+filter_options="".join(f'<option value="{slug(d)}">{e(d)}</option>' for d,_,_ in T)
 secs=""
-for d,ic,cs in T:
-  cards="".join(f'<article class="cat" data-s="{e((n+" "+ds+" "+r+" "+d).lower())}"><h4>{e(n)}</h4><p>{e(ds)}</p><small>Roles: {e(r)}</small><span class="tag">ROSTER: PLACEHOLDER — OPEN SLOT</span></article>' for n,ds,r in cs)
-  secs+=f'<section class="div" id="div-{slug(d)}" data-d="{slug(d)}"><h3>{ic} {e(d)} <span class="cnt">{len(cs)}</span></h3><div class="cats">{cards}</div></section>'
-opts="".join(f'<optgroup label="{e(d)}">'+"".join(f"<option>{e(n)}</option>" for n,_,_ in cs)+"</optgroup>" for d,_,cs in T)
+for i,(d,ic,cs) in enumerate(T,1):
+  cards="".join(f'<article class="category" data-search="{e((n+" "+ds+" "+r+" "+d).lower(),quote=True)}"><h3>{e(n)}</h3><p>{e(ds)}</p><small>EXAMPLE ROLES: {e(r)}</small></article>' for n,ds,r in cs)
+  secs+=f'<details class="division" id="div-{slug(d)}" data-division="{slug(d)}"{" open" if i==1 else ""}><summary><span class="division-index">{i:02d}</span><span class="division-title">{e(d)}</span><span class="division-count">{len(cs)} SPECIALTIES</span><span class="division-plus" aria-hidden="true">+</span></summary><div class="category-grid">{cards}</div></details>'
 h=open("template.html").read()
-for k,v in {"CHIPS":chips,"SECTIONS":secs,"OPTS":opts,"ND":str(nd),"NC":str(nc)}.items(): h=h.replace("{{"+k+"}}",v)
+for k,v in {"FILTER_OPTIONS":filter_options,"SECTIONS":secs,"ND":str(nd),"NC":str(nc)}.items(): h=h.replace("{{"+k+"}}",v)
 open("index.html","w").write(h)
 with open("taxonomy.csv","w",newline="") as f:
   w=csv.writer(f);w.writerow(["Division","Category","Description","Example roles","Roster status"])

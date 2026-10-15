@@ -11,7 +11,7 @@ Talent agency positioned to own the anime, manga, comics/webtoons and gaming tal
 - Zero-dependency static site: `index.html` + `styles.css`. No build step, no backend, no DB.
 - **Single source of truth:** `taxonomy.py` (list of divisions → categories with description + example roles).
 - `python3 gen.py` generates `index.html` (from `template.html`), `TAXONOMY.md` and `taxonomy.csv`. Never hand-edit those outputs.
-- `app.js` adds client-side search plus division filter chips (vanilla JS, no deps). The apply-form dropdown is grouped by division.
+- `app.js` adds client-side search, a division filter and the mobile navigation menu (vanilla JS, no deps). Divisions expand to show category descriptions and example roles.
 - Hosting: Vercel (Hobby/free), project `anistar-agency` under henryfinnai's Vercel account, deployed via CLI (not yet Git-connected).
 
 ## Run / deploy
@@ -23,10 +23,9 @@ vercel deploy --prod            # deploy (free tier)
 Recommended: connect the GitHub repo in Vercel so pushes to `main` auto-deploy.
 
 ## What is placeholder
-- **Every category card's roster** (labelled "ROSTER: PLACEHOLDER — OPEN SLOT") — no real talent is shown. Only add signed, consenting talent.
-- Contact email `hello@anistar.agency` (domain not owned/registered).
-- Apply form uses `mailto:` (no backend).
-- Text logo ANI★STAR, emoji icons, no imagery, no privacy/terms pages.
+- **Public roster:** no real talent is shown. Categories describe planned areas of representation. Only add signed, consenting talent.
+- Contact details and applications are marked as in preparation because `hello@anistar.agency` is unverified and no application backend exists.
+- The current site uses a text logo with a geometric star, an abstract hero graphic and no privacy/terms pages.
 
 ## Prioritized upgrade roadmap
 1. **Migrate to Next.js (App Router) + Tailwind**, keep static export; routes `/talent/[division]/[category]` and `/talent/[slug]` profiles generated from the taxonomy (move `taxonomy.py` to JSON/TS).

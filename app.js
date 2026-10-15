@@ -1,3 +1,48 @@
-const q=document.getElementById('q'),chips=[...document.querySelectorAll('.chip')],divs=[...document.querySelectorAll('.div')];let cur='all';
-function f(){const t=q.value.trim().toLowerCase();let any=0;divs.forEach(d=>{let n=0;d.querySelectorAll('.cat').forEach(c=>{const m=!t||c.dataset.s.includes(t);c.hidden=!m;n+=m});const show=(cur==='all'||d.dataset.d===cur)&&n>0;d.hidden=!show;any+=show});document.getElementById('none').hidden=!!any}
-q.addEventListener('input',f);chips.forEach(c=>c.onclick=()=>{chips.forEach(x=>x.classList.remove('on'));c.classList.add('on');cur=c.dataset.d;f()});
+const search = document.getElementById('q');
+const filter = document.getElementById('division-filter');
+const divisions = [...document.querySelectorAll('.division')];
+const resultCount = document.getElementById('result-count');
+const emptyState = document.getElementById('none');
+const menuButton = document.querySelector('.menu-toggle');
+const navigation = document.getElementById('primary-nav');
+
+function updateDirectory() {
+  const term = search.value.trim().toLowerCase();
+  let visibleCategories = 0;
+
+  divisions.forEach((division) => {
+    const inDivision = filter.value === 'all' || filter.value === division.dataset.division;
+    let matches = 0;
+
+    division.querySelectorAll('.category').forEach((category) => {
+      const match = !term || category.dataset.search.includes(term);
+      category.hidden = !match;
+      if (match) matches += 1;
+    });
+
+    division.hidden = !inDivision || matches === 0;
+    if (!division.hidden) {
+      visibleCategories += matches;
+      if (term || filter.value !== 'all') division.open = true;
+    }
+  });
+
+  resultCount.textContent = `Showing ${visibleCategories} ${visibleCategories === 1 ? 'specialty' : 'specialties'}`;
+  emptyState.hidden = visibleCategories > 0;
+}
+
+search.addEventListener('input', updateDirectory);
+filter.addEventListener('change', updateDirectory);
+
+menuButton.addEventListener('click', () => {
+  const open = menuButton.getAttribute('aria-expanded') !== 'true';
+  menuButton.setAttribute('aria-expanded', String(open));
+  menuButton.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+  navigation.classList.toggle('open', open);
+});
+
+navigation.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => {
+  menuButton.setAttribute('aria-expanded', 'false');
+  menuButton.setAttribute('aria-label', 'Open navigation');
+  navigation.classList.remove('open');
+}));
