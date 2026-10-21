@@ -1,4 +1,7 @@
-import csv,html,re,json,os
+import csv,html,re,json,os,hashlib
+from pathlib import Path
+def asset(name):
+  return "/"+name+"?v="+hashlib.sha256(Path(name).read_bytes()).hexdigest()[:10]
 from taxonomy import T
 from site_config import BASE,INQUIRY_EMAIL,FOUNDERS
 slug=lambda s:re.sub(r'[^a-z0-9]+','-',s.lower()).strip('-')
@@ -21,11 +24,11 @@ def head(title,desc,path,extra_ld=()):
 <link rel="canonical" href="{url}">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Anistar Agency">
 <meta property="og:title" content="{e(title)}"><meta property="og:description" content="{e(desc)}">
-<meta property="og:url" content="{url}"><meta property="og:image" content="{BASE}/og.png">
+<meta property="og:url" content="{url}"><meta property="og:image" content="{BASE}{asset('og.png')}">
 <meta property="og:image:width" content="2400"><meta property="og:image:height" content="1260">
-<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{e(title)}"><meta name="twitter:description" content="{e(desc)}"><meta name="twitter:image" content="{BASE}/og.png">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/styles.css">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{e(title)}"><meta name="twitter:description" content="{e(desc)}"><meta name="twitter:image" content="{BASE}{asset('og.png')}">
+<link rel="icon" href="{asset('favicon.svg')}" type="image/svg+xml">
+<link rel="stylesheet" href="{asset('styles.css')}">
 {lds}
 </head>
 <body data-inquiry-email="{e(INQUIRY_EMAIL)}">
@@ -42,7 +45,7 @@ FOOT=f'''<footer class="site-footer"><div class="shell footer-top"><a class="bra
 <div class="shell footer-links"><nav aria-label="Divisions">{"".join(f'<a href="/talent/{slug(d)}/">{e(d)}</a>' for d,_,_ in T)}</nav></div>
 <div class="shell footer-bottom"><span>© 2026 ANISTAR AGENCY</span><span>Independent agency in development</span></div></footer>
 <div class="brief-bar" data-brief-bar hidden role="region" aria-label="Your brief"><span><b data-brief-n>0</b> <span data-brief-label>specialties</span> in your brief</span><a class="button button-light" href="/#inquire">Prepare brief</a></div>
-<div class="shell source-credits"><p>Field photography: <a href="https://unsplash.com/photos/QxTH3tOoim0">Branden Skeli</a>, <a href="https://unsplash.com/photos/dtn13qlr2GY">CC PD</a>, <a href="https://unsplash.com/photos/Z09mEQdm3u4">Sean Do</a> and <a href="https://unsplash.com/photos/VdLUEgr7Awg">Les Taylor</a> / Unsplash.</p></div><script src="/app.js" defer></script>
+<div class="shell source-credits"><p>Field photography: <a href="https://unsplash.com/photos/QxTH3tOoim0">Branden Skeli</a>, <a href="https://unsplash.com/photos/dtn13qlr2GY">CC PD</a>, <a href="https://unsplash.com/photos/Z09mEQdm3u4">Sean Do</a> and <a href="https://unsplash.com/photos/VdLUEgr7Awg">Les Taylor</a> / Unsplash.</p></div><script src="{asset('app.js')}" defer></script>
 </body></html>
 '''
 
