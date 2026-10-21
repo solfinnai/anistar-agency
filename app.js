@@ -3,7 +3,7 @@ const EMAIL=document.body.dataset.inquiryEmail||'';
 // nav
 const menuButton=$('.menu-toggle'),navigation=$('#primary-nav');
 menuButton?.addEventListener('click',()=>{const o=menuButton.getAttribute('aria-expanded')!=='true';menuButton.setAttribute('aria-expanded',String(o));menuButton.setAttribute('aria-label',o?'Close navigation':'Open navigation');navigation.classList.toggle('open',o)});
-$$('#primary-nav a').forEach(a=>a.addEventListener('click',()=>{menuButton.setAttribute('aria-expanded','false');navigation.classList.remove('open')}));
+$$('#primary-nav a').forEach(a=>a.addEventListener('click',()=>{menuButton.setAttribute('aria-expanded','false');menuButton.setAttribute('aria-label','Open navigation');navigation.classList.remove('open')}));
 // directory
 const search=$('#q'),filter=$('#division-filter');
 function updateDirectory(){const term=search.value.trim().toLowerCase();let n=0;
@@ -13,16 +13,16 @@ function updateDirectory(){const term=search.value.trim().toLowerCase();let n=0;
  $('#result-count').textContent=`Showing ${n} ${n===1?'specialty':'specialties'}`;$('#none').hidden=n>0}
 if(search){search.addEventListener('input',updateDirectory);filter.addEventListener('change',updateDirectory);
  $('#clear-filters').addEventListener('click',()=>{search.value='';filter.value='all';updateDirectory();search.focus()});
- const p=new URLSearchParams(location.search);if(p.get('q')){search.value=p.get('q');updateDirectory()}}
+ const p=new URLSearchParams(location.search);if(p.get('q')){search.value=p.get('q');const all=$('#specialties');if(all)all.open=true;updateDirectory()}}
 // brief (shortlist) stored locally
 const KEY='anistar-brief';
-const getB=()=>{try{return JSON.parse(localStorage.getItem(KEY))||[]}catch{return[]}};
+const getB=()=>{try{const b=JSON.parse(localStorage.getItem(KEY));return Array.isArray(b)?b.filter(x=>typeof x==='string'):[]}catch{return[]}};
 const setB=b=>{try{localStorage.setItem(KEY,JSON.stringify(b))}catch{}render()};
 function toggle(n){const b=getB();setB(b.includes(n)?b.filter(x=>x!==n):[...b,n])}
 function render(){const b=getB();
  $$('.brief-add').forEach(x=>{const on=b.includes(x.dataset.brief);x.setAttribute('aria-pressed',String(on));x.textContent=on?'✓ In brief':'+ Add to brief'});
  $$('[data-brief-count]').forEach(x=>{x.hidden=!b.length;x.textContent=b.length});
- const bar=$('[data-brief-bar]');if(bar){bar.hidden=!b.length||!!$('#inquire');$('[data-brief-n]').textContent=b.length}
+ const bar=$('[data-brief-bar]');if(bar){bar.hidden=!b.length||!!$('#inquire');$('[data-brief-n]').textContent=b.length;const label=$('[data-brief-label]');if(label)label.textContent=b.length===1?'specialty':'specialties'}
  const list=$('[data-brief-list]');if(list){list.innerHTML='';b.forEach(n=>{const li=document.createElement('li');li.textContent=n;const r=document.createElement('button');r.type='button';r.className='brief-remove';r.setAttribute('aria-label','Remove '+n);r.textContent='×';r.onclick=()=>toggle(n);li.append(r);list.append(li)});$('[data-brief-empty]').hidden=b.length>0}}
 document.addEventListener('click',ev=>{const t=ev.target.closest('.brief-add');if(t)toggle(t.dataset.brief)});
 $('[data-brief-picker]')?.addEventListener('change',ev=>{const v=ev.target.value;if(v&&!getB().includes(v))toggle(v);ev.target.value=''});
@@ -39,3 +39,8 @@ function handle(form,title,build){form.addEventListener('submit',ev=>{ev.prevent
 const inq=$('#inquiry-form');if(inq)handle(inq,'Anistar brief',f=>`ANISTAR BRIEF\nName: ${f.name}\nEmail: ${f.email}\nOrganization: ${f.org||'-'}\nProject type: ${f.type}\nTiming: ${f.timing||'-'}\nBudget: ${f.budget||'Not shared'}\nSpecialties: ${getB().join('; ')||'Not specified'}\n\nDetails:\n${f.details||'-'}`);
 const ap=$('#apply-form');if(ap)handle(ap,'Anistar application',f=>`ANISTAR ROSTER APPLICATION\nName: ${f.name}\nEmail: ${f.email}\nSpecialty: ${f.specialty}\n\nLinks:\n${f.links}\n\nAbout:\n${f.about||'-'}`);
 $$('[data-copy]').forEach(b=>b.addEventListener('click',async()=>{const t=$('[data-result-text]',b.closest('form'));try{await navigator.clipboard.writeText(t.value);b.textContent='Copied'}catch{t.select();document.execCommand('copy');b.textContent='Copied'}}));
+
+// Open a linked contact panel before navigating to its fields.
+function openLinkedPanel(){const id=location.hash.slice(1);const panel=document.getElementById(id);if(panel?.matches('details'))panel.open=true;}
+window.addEventListener('hashchange',openLinkedPanel);openLinkedPanel();
+document.addEventListener('click',ev=>{const a=ev.target.closest('a[href]');if(!a)return;const u=new URL(a.href,location.href);if(u.origin===location.origin&&u.pathname===location.pathname&&u.hash){const panel=document.getElementById(u.hash.slice(1));if(panel?.matches('details'))panel.open=true;}});

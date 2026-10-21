@@ -62,3 +62,9 @@ Recommended: connect the GitHub repo in Vercel so pushes to `main` auto-deploy.
 
 - Should adult-content creator rosters be kept separate from the public brand?
 - Use Next.js or keep static until roster exists?
+
+## October 20, 2026: Codex editorial redesign
+
+Reworked template.html, styles.css and the shared page generator around a white editorial layout, Georgia headlines and Arial body text. Removed decorative section numbering, arrow flourishes, the orbital hero, statistic panels and fake roster slots. Preserved all 16 division pages, 135 specialties, founder bios, local brief selections, summary tools and SEO metadata. Added four credited Unsplash field photographs, an updated social card and an agency wordmark favicon. See ASSETS.md for source URLs. Photo captions explicitly distinguish field photography from represented talent.
+
+Verified homepage and a division page at desktop and phone widths, mobile menu behavior, Live2D search, add-to-brief and prepared summary output. Checked generated page targets and deterministic generation. Review images are stored in review/. Existing unconfigured inbox behavior is disclosed before forms are opened.
