@@ -13,6 +13,8 @@
 !book/**
 !apply
 !apply/**
+!credits
+!credits/**
 !img
 !img/**
 !vercel.json

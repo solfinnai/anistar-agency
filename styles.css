@@ -352,6 +352,48 @@ figcaption {
 
 .person p + p { margin-top: 0.7rem; }
 
+.plate {
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  display: flex;
+  align-items: flex-end;
+  padding: 0.85rem 1rem 1rem;
+  box-sizing: border-box;
+}
+
+.plate-mark {
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(5.5rem, 12vw, 8.5rem);
+  line-height: 0.75;
+}
+
+.credits {
+  list-style: none;
+  padding: 0;
+  margin: 2.2rem 0 0;
+  max-width: 40rem;
+  display: grid;
+  gap: 0;
+}
+
+.credits li {
+  border-top: 1px solid var(--ink);
+  padding: 0.85rem 0 1rem;
+}
+
+.credit-where {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 1.45rem;
+}
+
+.credit-file {
+  font-style: italic;
+  margin-top: 0.15rem;
+}
+
 .reach {
   display: grid;
   gap: 1.25rem;
