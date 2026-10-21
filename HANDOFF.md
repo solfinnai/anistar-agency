@@ -52,7 +52,7 @@ Recommended: connect the GitHub repo in Vercel so pushes to `main` auto-deploy.
 9. Brand pass (logo, art direction, illustration), self-host fonts, full accessibility audit (axe), legal pages, case studies once real work exists.
 
 ## Decisions
-- **Oct 20, 2026 (Henry):** Henry Finn and Ko Mori are Co-Founders and appear in the Founders section. Anistar is not tied to any Erocosplay or adult product.
+- **Oct 20, 2026 (Henry):** Henry Finn and Ko Mori are Co-Founders and appear in the Founders section. Anistar is kept separate from Erocosplay TCG.
 - **Oct 15, 2026 (Henry):** esports teams/orgs and game studios are represented as **talent on the roster**, not clients. Roster categories: *Esports Teams & Orgs* (Esports & Pro Gaming) and *Indie Game Developers & Studios* (Game Development Talent). For Brands targets publishers, media companies, conventions and consumer brands.
 
 ## Open questions
