@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://anistar-agency.vercel.app/sitemap.xml
