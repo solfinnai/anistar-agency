@@ -8,4 +8,11 @@
 !robots.txt
 !sitemap.xml
 !talent
+!talent/**
+!book
+!book/**
+!apply
+!apply/**
+!img
+!img/**
 !vercel.json

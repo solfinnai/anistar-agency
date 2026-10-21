@@ -1,8 +1,8 @@
 # Anistar Agency Talent Taxonomy
 
-16 divisions · 135 categories · Anime, manga, comics/webtoons and gaming. No real people listed.
+Anime, manga, comics, webtoons, and gaming. No individual talent is listed.
 
-## 🎨 Creators & Artists (18)
+## Creators & Artists
 
 | Category | Description | Example roles |
 |---|---|---|
@@ -25,7 +25,7 @@
 | NFT / Digital Collectible Artists | Web3 and digital-collectible art creators. | PFP artist, generative artist |
 | Art Streamers & Speedpainters | Artists who create live for audiences. | Live drawing streamer, speedpainter, artist alley performer |
 
-## 🎞️ Animation & Production Craft (11)
+## Animation & Production Craft
 
 | Category | Description | Example roles |
 |---|---|---|
@@ -41,7 +41,7 @@
 | Independent Animators | Indie shorts and YouTube animation creators. | Indie animator, animation YouTuber, AMV creator |
 | Editors & Post-Production | Editing and finishing for anime, trailers and content. | Video editor, trailer editor, colorist (video) |
 
-## 🎙️ Voice & Performance (10)
+## Voice & Performance
 
 | Category | Description | Example roles |
 |---|---|---|
@@ -56,7 +56,7 @@
 | Stage & 2.5D Musical Actors | Performers in anime-based stage plays and musicals. | 2.5D actor, musical lead, ensemble |
 | Stunt & Action Performers | Martial arts and stunt talent for adaptations and events. | Stunt performer, fight choreographer, suit actor |
 
-## 🎵 Music & Audio (9)
+## Music & Audio
 
 | Category | Description | Example roles |
 |---|---|---|
@@ -70,7 +70,7 @@
 | Utaite & Cover Artists | Cover singers and musical covers. | Utaite, cover singer, instrumental cover artist |
 | Orchestras & Live Ensembles | Concert performers of anime/game music. | Orchestra, chamber ensemble, solo pianist |
 
-## ✍️ Writing & Story (7)
+## Writing & Story
 
 | Category | Description | Example roles |
 |---|---|---|
@@ -82,7 +82,7 @@
 | Worldbuilders & Lore Writers | Universe bibles and lore for IP. | Lore writer, IP bible author, TTRPG designer |
 | Editors (Manga/Comics) | Editorial for publishers and creators. | Manga editor, developmental editor, tantou |
 
-## 🌐 Localization & Translation (5)
+## Localization & Translation
 
 | Category | Description | Example roles |
 |---|---|---|
@@ -92,7 +92,7 @@
 | Interpreters | Live interpretation for guests, events and deals. | Con interpreter, business interpreter |
 | Cultural & Sensitivity Consultants | Cultural accuracy and market adaptation. | Cultural consultant, sensitivity reader |
 
-## 🎭 Cosplay & Fashion (8)
+## Cosplay & Fashion
 
 | Category | Description | Example roles |
 |---|---|---|
@@ -105,7 +105,7 @@
 | J-Fashion & Alt Fashion Talent | Lolita, harajuku and alt-fashion figures. | J-fashion model, designer, stylist |
 | Streetwear & Collab Designers | Anime/gaming fashion collaborations. | Streetwear designer, collab designer |
 
-## 👗 Models & Brand Faces (6)
+## Models & Brand Faces
 
 | Category | Description | Example roles |
 |---|---|---|
@@ -116,7 +116,7 @@
 | Fitness & Lifestyle Models | Fitness and lifestyle creators in gaming/otaku culture. | Fitness model, lifestyle model |
 | Hand & Parts Models | Specialty models for product shots. | Hand model, parts model |
 
-## 📺 Streamers, VTubers & Creators (11)
+## Streamers, VTubers & Creators
 
 | Category | Description | Example roles |
 |---|---|---|
@@ -132,7 +132,7 @@
 | ASMR & Wellness Creators | ASMR and cozy content with anime/gaming themes. | ASMR creator, cozy gaming creator |
 | Community Builders & Discord Owners | Fandom community leaders. | Discord owner, subreddit mod, fan club leader |
 
-## 🏆 Esports & Pro Gaming (9)
+## Esports & Pro Gaming
 
 | Category | Description | Example roles |
 |---|---|---|
@@ -146,7 +146,7 @@
 | Esports Teams & Orgs | Full teams and organizations represented as roster talent. | Team, org, academy roster, content house |
 | TCG & Tabletop Competitors | Competitive card and tabletop players. | TCG pro, tournament judge |
 
-## 🕹️ Game Development Talent (9)
+## Game Development Talent
 
 | Category | Description | Example roles |
 |---|---|---|
@@ -160,7 +160,7 @@
 | QA & Playtesters | Quality assurance and playtesting talent. | QA tester, playtest lead |
 | Modders & UGC Creators | Mods, Roblox/Fortnite UGC and creation tools. | Modder, Roblox dev, UEFN creator |
 
-## 🌟 Celebrities, Hosts & Ambassadors (7)
+## Celebrities, Hosts & Ambassadors
 
 | Category | Description | Example roles |
 |---|---|---|
@@ -172,7 +172,7 @@
 | Industry Legends & Veterans | Veteran creators for appearances and consulting. | Legacy creator, retired director, veteran VA |
 | Brand Spokespersons | Official faces for IP and product launches. | Launch spokesperson, mascot performer |
 
-## 🎪 Events & Conventions (7)
+## Events & Conventions
 
 | Category | Description | Example roles |
 |---|---|---|
@@ -184,7 +184,7 @@
 | Live Event Producers & Stage Managers | Producers of shows, concerts and fan events. | Event producer, stage manager, show caller |
 | Workshop Instructors | Teaching talent for con workshops. | Drawing instructor, cosplay workshop lead |
 
-## 🧠 Media, Critics & Educators (6)
+## Media, Critics & Educators
 
 | Category | Description | Example roles |
 |---|---|---|
@@ -195,7 +195,7 @@
 | Japanese Language Educators | Japanese teachers using anime/manga. | JP teacher, language creator |
 | Academic Researchers | University researchers in anime, comics and games. | Professor, researcher, author |
 
-## 💼 IP, Licensing & Business (7)
+## IP, Licensing & Business
 
 | Category | Description | Example roles |
 |---|---|---|
@@ -207,7 +207,7 @@
 | Talent Managers & Scouts | Managers, recruiters and scouts. | Talent manager, scout, booking agent |
 | Crowdfunding & Creator Business Experts | Kickstarter, Patreon and creator-economy pros. | Campaign manager, Patreon strategist |
 
-## 🚀 Emerging & Tech (5)
+## Emerging & Tech
 
 | Category | Description | Example roles |
 |---|---|---|
