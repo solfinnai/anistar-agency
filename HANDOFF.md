@@ -37,7 +37,7 @@ Recommended: connect the GitHub repo in Vercel so pushes to `main` auto-deploy.
 - Text logo with a geometric star, abstract hero art, Google Fonts (not self-hosted), no privacy/terms pages.
 
 ## Research
-- Findings doc: "Anistar Agency site research and recommendations (Oct 20, 2026)" in the Anistar Drive folder, indexed in the Research Library master Sheet.
+- Findings doc: [2026-10-20 Anistar Agency Site Research and Recommendations (v1)](https://docs.google.com/document/d/1zH18gzPX65edCjWAIfUnma4mQOl1q8q54kxnm1rkSK4/edit), Research Library master Sheet row RL-270.
 
 ## Prioritized upgrade roadmap
 0. **Turn on real inquiry delivery:** confirm a monitored inbox and set `INQUIRY_EMAIL`, or wire a free form endpoint / Vercel function to a Sheet with Turnstile spam protection. Add privacy policy before collecting data.
