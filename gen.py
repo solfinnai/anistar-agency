@@ -138,7 +138,7 @@ ORG = {
     "@type": "Organization",
     "name": "Anistar Agency",
     "url": BASE + "/",
-    "logo": BASE + "/favicon.svg",
+    "logo": BASE + "/img/logo/anistar-lockup.png",
     "description": HOME_DESC,
     "founder": [
         {
@@ -181,6 +181,15 @@ NAV = [
 ]
 
 
+def logo_html(class_name):
+    return (
+        f'<a class="{class_name}" href="/"><picture>'
+        '<source srcset="/img/logo/anistar-lockup.webp" type="image/webp">'
+        '<img src="/img/logo/anistar-lockup.png" alt="Anistar" width="1275" height="859">'
+        "</picture></a>"
+    )
+
+
 def nav_html(current):
     parts = []
     for href, label, key in NAV:
@@ -203,7 +212,7 @@ def head(title, desc, path, current="", extra_ld=(), body_class=""):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#F3EEE4">
+<meta name="theme-color" content="#FBF4E8">
 <title>{e(title)}</title>
 <meta name="description" content="{e(desc)}">
 <link rel="canonical" href="{url}">
@@ -219,7 +228,7 @@ def head(title, desc, path, current="", extra_ld=(), body_class=""):
 <meta name="twitter:title" content="{e(title)}">
 <meta name="twitter:description" content="{e(desc)}">
 <meta name="twitter:image" content="{BASE}/og.png">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/img/logo/anistar-symbol-192.png" type="image/png">
 {font_links()}
 <link rel="stylesheet" href="/styles.css">
 {lds}
@@ -227,7 +236,7 @@ def head(title, desc, path, current="", extra_ld=(), body_class=""):
 <body class="{body_class}" data-license-status="{e(LICENSE_STATUS)}">
 <a class="skip" href="#main">Skip to content</a>
 <header class="mast">
-<a class="wordmark" href="/">Anistar</a>
+{logo_html("brand")}
 <nav id="primary-nav" class="primary" aria-label="Primary">{nav_html(current)}</nav>
 </header>
 """
@@ -237,7 +246,7 @@ def foot():
     divs = "".join(f'<a href="/talent/{slug(d)}/">{e(d)}</a>' for d, _, _ in T)
     return f"""<footer class="foot">
 <p class="status">{e(STATUS)}</p>
-<a class="wordmark" href="/">Anistar</a>
+{logo_html("brand")}
 <p class="foot-jp" lang="ja">{FOOTER_JP}</p>
 <nav aria-label="Footer">{nav_html("")}</nav>
 <nav class="foot-divs" aria-label="Divisions">{divs}</nav>
@@ -705,7 +714,7 @@ def main():
                 hits.append((path, phrase))
         if any(ord(ch) > 0x1F000 or 0x2600 <= ord(ch) <= 0x27BF for ch in text):
             hits.append((path, "emoji"))
-        if "<img" in text or "filemark" in text:
+        if "filemark" in text or 'class="mat"' in text:
             hits.append((path, "image-box"))
     if hits:
         raise SystemExit("banned copy found: " + repr(hits[:30]))

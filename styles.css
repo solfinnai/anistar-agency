@@ -1,9 +1,10 @@
 :root {
-  --paper: #F3EEE4;
-  --ink: #14110F;
-  --ink-70: rgba(20, 17, 15, 0.7);
-  --rule: rgba(20, 17, 15, 0.22);
-  --red: #B5121B;
+  --paper: #FBF4E8;
+  --ink: #1B174D;
+  --ink-70: rgba(27, 23, 77, 0.7);
+  --rule: rgba(27, 23, 77, 0.22);
+  --gold: #FCCE77;
+  --pink: #FA7590;
   --display: "Newsreader", "Noto Serif JP", serif;
   --text: "IBM Plex Sans", "Noto Serif JP", sans-serif;
   --jp: "Noto Serif JP", "Newsreader", serif;
@@ -59,7 +60,7 @@ a { color: inherit; }
 a:visited { color: inherit; }
 
 :focus-visible {
-  outline: 2px solid var(--red);
+  outline: 2px solid var(--ink);
   outline-offset: 3px;
 }
 
@@ -82,17 +83,32 @@ a:visited { color: inherit; }
 .mast {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 8px var(--gap);
+  gap: 12px var(--gap);
   padding: var(--gap);
   border-bottom: 1px solid var(--ink);
 }
 
-.wordmark {
-  font-size: 28px;
-  line-height: 1;
+.brand {
+  display: block;
+  width: min(240px, 100%);
+  flex: 0 0 auto;
+  min-width: 0;
+  max-width: 100%;
+  line-height: 0;
   text-decoration: none;
+}
+
+.brand picture { display: block; max-width: 100%; }
+
+.brand img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+  background: transparent;
 }
 
 .primary {
@@ -157,8 +173,8 @@ main > .status { padding: var(--gap) var(--gap) 0; }
   justify-content: center;
   min-height: 44px;
   padding: 0 16px;
-  background: var(--red);
-  color: var(--paper);
+  background: var(--ink);
+  color: var(--gold);
   text-decoration: none;
   border: 0;
   border-radius: 0;
@@ -169,7 +185,7 @@ main > .status { padding: var(--gap) var(--gap) 0; }
   cursor: pointer;
 }
 
-.btn:hover { background: var(--ink); color: var(--paper); }
+.btn:hover { background: var(--ink); color: var(--pink); }
 
 .textlink, .textbtn {
   font-size: 16px;
@@ -190,6 +206,16 @@ main > .status { padding: var(--gap) var(--gap) 0; }
 }
 
 .plan-link { font-size: 16px; }
+
+.hero-mark {
+  display: block;
+  width: min(100%, 380px);
+  height: auto;
+  max-width: 100%;
+  margin: 0 0 12px;
+  object-fit: contain;
+  background: transparent;
+}
 
 .side-kicker, .req, .quiet, .roles, .colophon, .credit-file {
   font-size: 14px;
@@ -455,8 +481,7 @@ textarea[aria-invalid="true"] { border-width: 2px; }
   display: grid;
   gap: 12px;
 }
-.foot .wordmark { text-decoration: none; }
-.foot .wordmark:hover { text-decoration: underline; text-underline-offset: 0.12em; }
+.foot .brand { width: min(320px, 100%); }
 .foot nav[aria-label="Footer"] {
   display: flex;
   flex-wrap: wrap;
@@ -482,6 +507,7 @@ textarea[aria-invalid="true"] { border-width: 2px; }
 
 @media (min-width: 800px) {
   h1 { font-size: 56px; }
+  .brand { width: 220px; }
   h2, .field h2, .cats h2, .pager a, .person h3 { font-size: 40px; }
   .index-copy h3,
   .index-block.lead .index-copy h3,
@@ -529,6 +555,17 @@ textarea[aria-invalid="true"] { border-width: 2px; }
   .field .cat-list { columns: 2; column-gap: var(--gap); margin-top: 0; }
   .foot-divs { columns: 4; column-gap: var(--gap); }
   .foot-divs a { display: block; margin: 0 0 6px; }
+}
+
+@media (min-width: 1100px) {
+  .mast { flex-wrap: nowrap; }
+}
+
+@media (max-width: 799px) {
+  .mast { align-items: flex-start; }
+  .mast { flex-wrap: wrap; }
+  .brand,
+  .foot .brand { width: min(280px, 100%); }
 }
 
 @media (prefers-reduced-motion: reduce) {

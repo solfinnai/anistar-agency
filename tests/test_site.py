@@ -76,7 +76,6 @@ class SiteTests(unittest.TestCase):
             "type=\"email\"",
             "type=\"file\"",
             "type=\"submit\"",
-            "<img",
             "filemark",
         ]
         for path in pages():
@@ -136,9 +135,10 @@ class SiteTests(unittest.TestCase):
 
     def test_visual_system_sources(self):
         css = (ROOT / "styles.css").read_text()
-        self.assertIn("#F3EEE4", css)
-        self.assertIn("#14110F", css)
-        self.assertIn("#B5121B", css)
+        for color in ("#FBF4E8", "#1B174D", "#FCCE77", "#FA7590"):
+            self.assertIn(color, css)
+        self.assertNotIn("#B5121B", css)
+        self.assertNotIn("#14110F", css)
         for phrase in ("gradient", "backdrop-filter", "box-shadow", "@keyframes", "Inter", "Geist", "system-ui"):
             self.assertNotIn(phrase, css)
         html = (ROOT / "index.html").read_text()
@@ -147,6 +147,27 @@ class SiteTests(unittest.TestCase):
         self.assertIn("family=Noto+Serif+JP", html)
         for phrase in ("family=Inter", "family=Geist", "Bodoni", "Shippori", "Roboto"):
             self.assertNotIn(phrase, html)
+
+    def test_logo_asset_is_the_supplied_file(self):
+        import hashlib
+        from PIL import Image
+
+        source = ROOT / "img" / "logo" / "anistar-logo-source.png"
+        digest = hashlib.sha256(source.read_bytes()).hexdigest()
+        self.assertEqual(digest, "dd7f7b0188033b6e51a3b9c831513555b4406a1391d7139655527438e5c6bd3d")
+        lockup = Image.open(ROOT / "img" / "logo" / "anistar-lockup.png")
+        symbol = Image.open(ROOT / "img" / "logo" / "anistar-symbol.png")
+        self.assertEqual(lockup.mode, "RGBA")
+        self.assertEqual(symbol.mode, "RGBA")
+        self.assertEqual(lockup.size, (1275, 859))
+        self.assertEqual(symbol.size, (796, 653))
+        self.assertEqual(lockup.getpixel((0, 0))[3], 0)
+        self.assertEqual(symbol.getpixel((0, 0))[3], 0)
+        home = (ROOT / "index.html").read_text()
+        self.assertIn('alt="Anistar"', home)
+        self.assertIn("/img/logo/anistar-lockup.png", home)
+        self.assertIn("/img/logo/anistar-symbol.png", home)
+        self.assertNotIn("favicon.svg", home)
 
     def test_browser_shortlist_and_forms(self):
         chrome = "/usr/bin/google-chrome-stable"

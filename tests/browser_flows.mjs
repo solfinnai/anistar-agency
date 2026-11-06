@@ -92,6 +92,30 @@ async function setViewport(width, height) {
   });
 }
 
+async function assertLogo(label, minWidth) {
+  const logo = await evaluate(`(() => {
+    const img = document.querySelector("header .brand img");
+    return img.decode().then(() => {
+      const rect = img.getBoundingClientRect();
+      return {
+        alt: img.alt,
+        w: rect.width,
+        h: rect.height,
+        nw: img.naturalWidth,
+        nh: img.naturalHeight,
+        complete: img.complete,
+      };
+    });
+  })()`);
+  if (logo.alt !== "Anistar" || !logo.complete || logo.nw !== 1275 || logo.nh !== 859) {
+    fail(`${label} is not the lockup: ${JSON.stringify(logo)}`);
+  }
+  if (logo.w < minWidth || logo.h < 80) fail(`${label} is too small: ${JSON.stringify(logo)}`);
+  const shown = logo.w / logo.h;
+  const intrinsic = logo.nw / logo.nh;
+  if (Math.abs(shown - intrinsic) > 0.03) fail(`${label} is distorted: ${JSON.stringify(logo)}`);
+}
+
 async function assertNoOverflow(label) {
   const widths = await evaluate("[document.documentElement.scrollWidth, document.documentElement.clientWidth]");
   if (widths[0] > widths[1] + 1) fail(`${label} overflows: ${widths.join(" > ")}`);
@@ -150,6 +174,7 @@ try {
   if (home.bookCta) fail("home still shows Book talent");
   if (home.navDisplay === "none") fail("primary navigation is hidden at 1440");
   if (home.license !== "forming" || home.email) fail("license or email dataset is wrong");
+  await assertLogo("header logo 1440", 200);
   await assertNoOverflow("home 1440");
 
   await setViewport(390, 844);
@@ -164,6 +189,7 @@ try {
   if (cta.text !== "Explore talent categories" || cta.height < 44 || cta.top > 844) {
     fail(`primary CTA is not visible on the first mobile screen: ${JSON.stringify(cta)}`);
   }
+  await assertLogo("header logo 390", 200);
   await assertNoOverflow("home 390");
 
   await send("Input.dispatchKeyEvent", {
@@ -186,8 +212,8 @@ try {
     return { text: (el.textContent || "").trim().slice(0, 40), outline: style.outlineColor, style: style.outlineStyle };
   })()`);
   if (!/Skip to content/.test(focus.text)) fail(`first tab did not reach the skip link: ${JSON.stringify(focus)}`);
-  if (focus.style === "none" || !focus.outline.includes("181")) {
-    fail(`skip link focus ring is not the red accent: ${JSON.stringify(focus)}`);
+  if (focus.style === "none" || !focus.outline.includes("27, 23, 77")) {
+    fail(`skip link focus ring is not navy: ${JSON.stringify(focus)}`);
   }
 
   await setViewport(1440, 900);

@@ -33,7 +33,7 @@ Production deploy and connecting this repo to Vercel are separate approvals. Do 
 ## What is placeholder
 - **Public roster:** no real talent is shown. Categories describe the map. Only add signed, consenting talent later, with approval.
 - **Inquiry delivery:** no inbox is configured. Forms only prepare a copy and say nothing was sent. Do not add a privacy or terms stub and present it as a policy.
-- Text wordmark, Google Fonts (Newsreader, IBM Plex Sans, Noto Serif JP). Unsplash files remain in `img/` for attribution and are not used as a roster.
+- The public mark is the supplied lockup in `img/logo/` (transparent PNG, plus a symbol crop taken from that file). Navy `#1B174D`, gold `#FCCE77`, and pink `#FA7590` are sampled from it. Google Fonts remain Newsreader, IBM Plex Sans, and Noto Serif JP. Unsplash files remain in `img/` for attribution and are not used as a roster.
 
 ## Research
 - Findings doc: [2026-10-20 Anistar Agency Site Research and Recommendations (v1)](https://docs.google.com/document/d/1zH18gzPX65edCjWAIfUnma4mQOl1q8q54kxnm1rkSK4/edit), Research Library master Sheet row RL-270.
