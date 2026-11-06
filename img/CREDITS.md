@@ -1,8 +1,8 @@
 # Photography credits
 
-Photographs on this site are from Unsplash, under the Unsplash License: https://unsplash.com/license
+Image files under img/ are from Unsplash, under the Unsplash License: https://unsplash.com/license
 
-Henry Finn and Ko Mori are set in type, waiting for their own portraits.
+Public pages do not display them. They are not pictures of Anistar talent, clients, or events.
 
 | File | Well | Photographer | Profile | Unsplash photo |
 |---|---|---|---|---|

@@ -1,166 +1,301 @@
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-const EMAIL = document.body.dataset.inquiryEmail || "";
-const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-const menuButton = $(".menu-btn");
-const navigation = $("#primary-nav");
-function setMenu(open) {
-  if (!menuButton || !navigation) return;
-  menuButton.setAttribute("aria-expanded", String(open));
-  menuButton.textContent = open ? "Close" : "Menu";
-  navigation.classList.toggle("open", open);
+// Category names only. Form fields are never written here, and nothing is sent.
+const KEY = "anistar-brief";
+
+const getB = () => {
+  try {
+    const value = JSON.parse(localStorage.getItem(KEY));
+    return Array.isArray(value) ? value.filter((item) => typeof item === "string") : [];
+  } catch {
+    return [];
+  }
+};
+
+const setB = (items) => {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(items));
+  } catch {
+    /* private mode and blocked storage still leave the note on the page */
+  }
+  render();
+};
+
+function toggle(name) {
+  const items = getB();
+  setB(items.includes(name) ? items.filter((item) => item !== name) : [...items, name]);
 }
-menuButton?.addEventListener("click", () => {
-  setMenu(menuButton.getAttribute("aria-expanded") !== "true");
+
+function render() {
+  const items = getB();
+  $$(".brief-add").forEach((button) => {
+    const on = items.includes(button.dataset.brief);
+    button.setAttribute("aria-pressed", String(on));
+    button.textContent = on ? "Added" : "Add";
+    const verb = on ? "Remove " : "Add ";
+    const tail = on ? " from the planning note" : " to the planning note";
+    button.setAttribute("aria-label", verb + button.dataset.brief + tail);
+  });
+  $$("[data-brief-count]").forEach((node) => {
+    node.hidden = items.length === 0;
+    node.textContent = items.length ? String(items.length) : "";
+  });
+  const list = $("[data-brief-list]");
+  if (list) {
+    list.replaceChildren();
+    items.forEach((name) => {
+      const li = document.createElement("li");
+      const label = document.createElement("span");
+      label.textContent = name;
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "textbtn";
+      remove.textContent = "Remove";
+      remove.setAttribute("aria-label", "Remove " + name + " from the planning note");
+      remove.addEventListener("click", () => toggle(name));
+      li.append(label, remove);
+      list.append(li);
+    });
+    const empty = $("[data-brief-empty]");
+    if (empty) empty.hidden = items.length > 0;
+  }
+}
+
+document.addEventListener("click", (ev) => {
+  const button = ev.target.closest(".brief-add");
+  if (button) toggle(button.dataset.brief);
 });
-$$("#primary-nav a").forEach((a) => a.addEventListener("click", () => setMenu(false)));
-document.addEventListener("keydown", (ev) => {
-  if (ev.key === "Escape") setMenu(false);
+
+$("[data-brief-picker]")?.addEventListener("change", (ev) => {
+  const value = ev.target.value;
+  if (value && !getB().includes(value)) toggle(value);
+  ev.target.value = "";
 });
 
 const search = $("#q");
 const finder = $("#finder");
+let division = "all";
+
+function setDivision(next) {
+  division = next || "all";
+  $$(".filter").forEach((button) => {
+    button.setAttribute("aria-pressed", String(button.dataset.division === division));
+  });
+}
+
 function applySearch() {
   if (!search) return;
   const term = search.value.trim().toLowerCase();
-  let n = 0;
+  let count = 0;
   $$(".field").forEach((field) => {
+    const inDivision = division === "all" || field.dataset.division === division;
     const blob = field.dataset.search || "";
-    let vis = 0;
+    let visible = 0;
     $$("li", field).forEach((li) => {
-      const ok = !term || (li.dataset.search || "").includes(term) || blob.includes(term);
+      const matches = !term || (li.dataset.search || "").includes(term) || blob.includes(term);
+      const ok = inDivision && matches;
       li.hidden = !ok;
-      if (ok) vis += 1;
+      if (ok) visible += 1;
     });
-    field.hidden = vis === 0;
-    n += vis;
+    field.hidden = !inDivision || visible === 0;
+    count += field.hidden ? 0 : visible;
   });
-  const count = $("#count");
+  const countNode = $("#count");
   const none = $("#none");
   const clear = $("#clear");
-  if (count) count.textContent = term ? `${n} ${n === 1 ? "match" : "matches"}` : "";
-  if (none) none.hidden = !term || n > 0;
-  if (clear) clear.hidden = !term;
+  if (countNode) {
+    countNode.textContent = term || division !== "all" ? `${count} ${count === 1 ? "match" : "matches"}` : "";
+  }
+  if (none) none.hidden = (!term && division === "all") || count > 0;
+  if (clear) clear.hidden = !term && division === "all";
 }
+
+function writeFinderUrl() {
+  const url = new URL(location.href);
+  const value = search.value.trim();
+  if (value) url.searchParams.set("q", value);
+  else url.searchParams.delete("q");
+  if (division !== "all") url.searchParams.set("division", division);
+  else url.searchParams.delete("division");
+  history.replaceState(null, "", url);
+}
+
 if (search) {
-  search.addEventListener("input", applySearch);
+  search.addEventListener("input", () => {
+    applySearch();
+    writeFinderUrl();
+  });
   finder?.addEventListener("submit", (ev) => {
     ev.preventDefault();
-    const url = new URL(location.href);
-    const v = search.value.trim();
-    if (v) url.searchParams.set("q", v);
-    else url.searchParams.delete("q");
-    history.replaceState(null, "", url);
     applySearch();
+    writeFinderUrl();
+  });
+  $$(".filter").forEach((button) => {
+    button.addEventListener("click", () => {
+      setDivision(button.dataset.division);
+      applySearch();
+      writeFinderUrl();
+      button.focus();
+    });
   });
   $("#clear")?.addEventListener("click", () => {
     search.value = "";
-    const url = new URL(location.href);
-    url.searchParams.delete("q");
-    history.replaceState(null, "", url);
+    setDivision("all");
     applySearch();
+    writeFinderUrl();
     search.focus();
   });
   const params = new URLSearchParams(location.search);
-  if (params.get("q")) {
-    search.value = params.get("q");
-    applySearch();
+  if (params.get("division")) setDivision(params.get("division"));
+  if (params.get("q")) search.value = params.get("q");
+  applySearch();
+}
+
+function syncSpecialty(form) {
+  const divisionSelect = $("[name=division]", form);
+  const specialty = $("[name=specialty]", form);
+  if (!divisionSelect || !specialty) return;
+  const wanted = divisionSelect.value;
+  $$("optgroup", specialty).forEach((group) => {
+    const on = !wanted || group.label === wanted;
+    $$("option", group).forEach((option) => {
+      option.disabled = !on;
+    });
+  });
+  const selected = specialty.selectedOptions[0];
+  if (selected && selected.disabled) specialty.value = "";
+}
+
+function prefill(form) {
+  const params = new URLSearchParams(location.search);
+  const divisionSelect = $("[name=division]", form);
+  const specialty = $("[name=specialty]", form);
+  const wantedDivision = params.get("division");
+  const wantedSpecialty = params.get("specialty");
+  if (divisionSelect && wantedDivision && [...divisionSelect.options].some((option) => option.value === wantedDivision)) {
+    divisionSelect.value = wantedDivision;
+  }
+  syncSpecialty(form);
+  if (specialty && wantedSpecialty && [...specialty.options].some((option) => option.value === wantedSpecialty && !option.disabled)) {
+    specialty.value = wantedSpecialty;
   }
 }
 
-const divisionSelect = $("[name=division]");
-if (divisionSelect) {
-  const wanted = new URLSearchParams(location.search).get("division");
-  if (wanted && [...divisionSelect.options].some((o) => o.value === wanted)) divisionSelect.value = wanted;
+function invalid(field) {
+  if (field.type === "checkbox") return !field.checked;
+  const value = String(field.value || "").trim();
+  if (!value) return true;
+  if (field.type === "url") {
+    try {
+      const url = new URL(value);
+      if (url.protocol !== "http:" && url.protocol !== "https:") return true;
+    } catch {
+      return true;
+    }
+  }
+  return false;
 }
 
-function handle(form, title, build) {
-  form.addEventListener("submit", (ev) => {
-    ev.preventDefault();
-    const err = $(".form-error", form);
-    const bad = $$("[required]", form).filter((i) => {
-      if (!i.value.trim()) return true;
-      if (i.type === "email" && !/^\S+@\S+\.\S+$/.test(i.value)) return true;
-      return false;
-    });
-    $$("[aria-invalid]", form).forEach((i) => i.removeAttribute("aria-invalid"));
-    bad.forEach((i) => i.setAttribute("aria-invalid", "true"));
+const line = (label, value) => `${label}: ${value && String(value).trim() ? String(value).trim() : "-"}`;
+
+const NO_SEND = "Nothing was sent. Anistar did not receive this note. Copy it if you want to keep it.";
+
+function handle(form, build) {
+  const prepare = () => {
+    const error = $(".form-error", form);
+    const fields = $$("input, select, textarea", form).filter((field) => field.required || field.type === "url");
+    const bad = fields.filter(invalid);
+    $$("[aria-invalid]", form).forEach((field) => field.removeAttribute("aria-invalid"));
+    bad.forEach((field) => field.setAttribute("aria-invalid", "true"));
+    if (!error.id) error.id = form.id + "-error";
     if (bad.length) {
-      const emailBad = bad.find((i) => i.type === "email" && i.value.trim());
-      err.hidden = false;
-      err.textContent = emailBad
-        ? "Enter an email address that looks complete."
-        : `Please fill in ${bad.map((i) => i.dataset.label || "a field").join(", ")}.`;
+      const urlBad = bad.find((field) => field.type === "url" && field.value.trim());
+      error.hidden = false;
+      error.textContent = urlBad
+        ? "Enter a public https:// address."
+        : `Please fill in ${bad.map((field) => field.dataset.label || "a field").join(", ")}.`;
+      bad.forEach((field) => field.setAttribute("aria-describedby", error.id));
       bad[0].focus();
       return;
     }
-    err.hidden = true;
-    const f = Object.fromEntries(new FormData(form));
-    const text = build(f);
-    const res = $("[data-result]", form);
-    const msg = $("[data-result-msg]", form);
-    res.hidden = false;
-    $("[data-result-text]", form).value = text;
-    if (EMAIL) {
-      msg.textContent = "Your email app should open with this note. If it does not, copy the text below.";
-      location.href = `mailto:${EMAIL}?subject=${encodeURIComponent(title + ": " + (f.org || f.name))}&body=${encodeURIComponent(text)}`;
-    } else {
-      msg.textContent = "Nothing was sent. Anistar has no public inbox on this site yet. Copy this note and keep it.";
-    }
-    msg.focus();
-    res.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "nearest" });
+    error.hidden = true;
+    $$("[aria-describedby]", form).forEach((field) => field.removeAttribute("aria-describedby"));
+    const data = Object.fromEntries(new FormData(form));
+    const result = $("[data-result]", form);
+    const message = $("[data-result-msg]", form);
+    result.hidden = false;
+    $("[data-result-text]", form).value = build(data);
+    message.textContent = NO_SEND;
+    message.focus();
+  };
+  form.addEventListener("submit", (ev) => {
+    ev.preventDefault();
+    prepare();
   });
-}
-
-const line = (label, value) => `${label}: ${value && String(value).trim() ? value : "-"}`;
-const inq = $("#inquiry-form");
-if (inq) {
-  handle(inq, "Anistar booking", (f) =>
-    [
-      "ANISTAR BOOKING NOTE",
-      line("Name", f.name),
-      line("Email", f.email),
-      line("Organization", f.org),
-      line("Project type", f.type),
-      line("Field", f.division),
-      line("Specialty", f.specialty),
-      line("Timing", f.timing),
-      line("Budget", f.budget),
-      "",
-      "The job:",
-      f.details || "-",
-    ].join("\n")
-  );
-}
-const ap = $("#apply-form");
-if (ap) {
-  handle(ap, "Anistar application", (f) =>
-    [
-      "ANISTAR REPRESENTATION NOTE",
-      line("Name", f.name),
-      line("Email", f.email),
-      line("Field", f.specialty),
-      "",
-      "Links:",
-      f.links || "-",
-      "",
-      "About the work:",
-      f.about || "-",
-    ].join("\n")
-  );
-}
-
-$$("[data-copy]").forEach((b) =>
-  b.addEventListener("click", async () => {
-    const t = $("[data-result-text]", b.closest("form"));
-    try {
-      await navigator.clipboard.writeText(t.value);
-      b.textContent = "Copied";
-    } catch {
-      t.focus();
-      t.select();
-      b.textContent = "Select the note and copy it";
+  $("[data-prepare]", form)?.addEventListener("click", prepare);
+  form.addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter" && ev.target.matches("input")) {
+      ev.preventDefault();
+      prepare();
     }
-  })
-);
+  });
+  $("[name=division]", form)?.addEventListener("change", () => syncSpecialty(form));
+  prefill(form);
+}
+
+const inquiry = $("#inquiry-form");
+if (inquiry) {
+  handle(inquiry, (data) =>
+    [
+      "ANISTAR PLANNING NOTE",
+      "Nothing was sent. This is not a booking.",
+      line("Organization", data.org),
+      line("Project type", data.type),
+      line("Timing", data.timing),
+      line("City", data.city),
+      line("Division", data.division),
+      line("Category", data.specialty),
+      "",
+      "Categories in this browser:",
+      getB().join("\n") || "-",
+      "",
+      "What the project would need:",
+      data.details || "-",
+    ].join("\n")
+  );
+}
+
+const applyForm = $("#apply-form");
+if (applyForm) {
+  handle(applyForm, (data) =>
+    [
+      "ANISTAR TALENT INTEREST NOTE",
+      "Nothing was sent. This is not a representation agreement.",
+      line("Public name", data.name),
+      line("Division", data.division),
+      line("Category", data.specialty),
+      line("Public URL", data.url),
+      line("18 or older", data.adult === "yes" ? "yes" : "no"),
+      "",
+      "Note:",
+      data.about || "-",
+    ].join("\n")
+  );
+}
+
+$$("[data-copy]").forEach((button) => {
+  button.addEventListener("click", async () => {
+    const note = $("[data-result-text]", button.closest("form"));
+    try {
+      await navigator.clipboard.writeText(note.value);
+      button.textContent = "Copied";
+    } catch {
+      note.focus();
+      note.select();
+      button.textContent = "Select the note and copy it";
+    }
+  });
+});
+
+render();

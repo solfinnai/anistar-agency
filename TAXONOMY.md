@@ -1,6 +1,6 @@
 # Anistar Agency Talent Taxonomy
 
-Anime, manga, comics, webtoons, and gaming. No individual talent is listed.
+Anime, manga, comics, webtoons, and gaming. No individual talent is listed. Esports teams and game studios are talent categories.
 
 ## Creators & Artists
 

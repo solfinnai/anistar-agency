@@ -1,13 +1,20 @@
 import csv, html, json, os, re, urllib.parse
+from pathlib import Path
 from taxonomy import T
-from site_config import BASE, INQUIRY_EMAIL, FOUNDERS
+from site_config import BASE, FOUNDERS, LICENSE_NUMBER, LICENSE_STATUS, STATUS
+
+if LICENSE_STATUS != "forming" or LICENSE_NUMBER:
+    raise SystemExit("LICENSE_STATUS must stay forming with an empty license number")
 
 slug = lambda s: re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
 e = lambda s: html.escape(s, quote=True)
 
-FOOTER_JP = "アニメ、マンガ、コミック、ゲームのタレント事務所"
-COVER_JP = "アニメ、コスプレ、クリエイターの事務所"
-WORD_JP = "アニスター"
+FOOTER_JP = "アニメ、マンガ、コミック、ゲームのタレント事務所（準備中）"
+COVER_JP = "アニメ、コスプレ、クリエイターの事務所（準備中）"
+HOME_DESC = (
+    "Anistar is in development. A category map for anime, cosplay, manga, comics, and games. "
+    "Talent representation and booking services are not yet available."
+)
 
 META = {
     "Creators & Artists": {
@@ -57,12 +64,12 @@ META = {
     },
     "Esports & Pro Gaming": {
         "jp": "eスポーツ",
-        "lede": "Pro players, fighting-game competitors, casters, coaches, and whole teams. Teams and organizations are roster talent.",
+        "lede": "Pro players, fighting-game competitors, casters, coaches, and whole teams. Teams and organizations are talent categories.",
         "cap": "Players, casters, and whole teams.",
     },
     "Game Development Talent": {
         "jp": "ゲーム開発",
-        "lede": "Designers, programmers, artists, producers, and indie studios. A studio is roster talent, the same as a solo developer.",
+        "lede": "Designers, programmers, artists, producers, and indie studios. A studio is a talent category, the same as a solo developer.",
         "cap": "People who make the games.",
     },
     "Celebrities, Hosts & Ambassadors": {
@@ -93,20 +100,19 @@ META = {
 }
 
 LEADS = {"Creators & Artists", "Voice & Performance", "Cosplay & Fashion"}
-FEATURED = [
-    ("Cosplay & Fashion", "3 / 4", "f-cos", "Guest cosplayers, masquerade judges, costume and prop makers, wig stylists, and cosplay photographers. Conventions book them. So do brands, when a character has to stand in the room."),
-    ("Voice & Performance", "1 / 1", "f-voice", "English dub actors, Japanese seiyuu, game voice actors, and ADR directors. Also motion-capture performers, narrators, and actors in 2.5D musicals."),
-    ("Creators & Artists", "2 / 3", "f-art", "Illustrators, mangaka, comic artists, character designers, and the benches behind them: backgrounds, tones, inks, color, letters."),
-    ("Streamers, VTubers & Creators", "4 / 5", "f-stream", "Gaming streamers, independent VTubers, VTuber units, and watch-along hosts. Also the channels that stay with a series after the episode airs."),
-    ("Music & Audio", "16 / 9", "f-music", "Anisong singers, composers for anime and games, idol performers, utaite, and ensembles that play this music live."),
-]
-ROSTER_PHOTOS = {0, 6, 12}
+LEAD_LAYOUT = {
+    "Creators & Artists": "lead wide",
+    "Voice & Performance": "lead narrow",
+    "Cosplay & Fashion": "lead flip",
+}
 
 names = [d for d, _, _ in T]
 missing = [n for n in names if n not in META]
 assert not missing, missing
+assert len(T) == 16
+assert sum(len(cs) for _, _, cs in T) == 135
 
-# Free Unsplash License photographs. Founder wells stay typographic until real portraits exist.
+# Free Unsplash License photographs shipped with the repo. Public pages do not display them.
 PHOTO_CREDITS = [
     ("cover.jpg", "Cover", "Denys Nevozhai", "https://unsplash.com/@dnevozhai", "https://unsplash.com/photos/alleyway-with-red-lanterns-in-tokyo-D68ADLeMh5Q"),
     ("talent-creators-artists.jpg", "Creators & Artists", "Kelly Sikkema", "https://unsplash.com/@kellysikkema", "https://unsplash.com/photos/person-drawing-on-tablet-at-workspace-Dx1b5ucschA"),
@@ -127,23 +133,27 @@ PHOTO_CREDITS = [
     ("talent-emerging-tech.jpg", "Emerging Tech", "Shahrooz Shekaraubi", "https://unsplash.com/@shahroozshekaraubi", "https://unsplash.com/photos/a-pair-of-vr-headset-sitting-on-top-of-a-table-BCLUHs9kDC0"),
 ]
 
-
 ORG = {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "Anistar Agency",
     "url": BASE + "/",
     "logo": BASE + "/favicon.svg",
-    "description": "Talent agency for anime, cosplay, and creator talent, and for manga, comics, and games.",
+    "description": HOME_DESC,
     "founder": [
-        {"@type": "Person", "name": f["name"], "jobTitle": f["role"], "sameAs": [f["link"]]}
+        {
+            "@type": "Person",
+            "name": f["name"],
+            "jobTitle": f["role"],
+            "sameAs": [href for href, _label in f["links"]],
+        }
         for f in FOUNDERS
     ],
 }
 
 
 def jp_text():
-    blobs = [FOOTER_JP, COVER_JP, WORD_JP, "表紙", "創業者", "ロスター"]
+    blobs = [FOOTER_JP, COVER_JP]
     blobs += [m["jp"] for m in META.values()]
     seen = []
     for blob in blobs:
@@ -154,8 +164,8 @@ def jp_text():
 
 
 def font_links():
-    latin = "https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;0,6..96,600;1,6..96,500;1,6..96,600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap"
-    jp = "https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600&family=Zen+Kaku+Gothic+New:wght@400;500&display=swap&text=" + urllib.parse.quote(jp_text())
+    latin = "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap"
+    jp = "https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;600&display=swap&text=" + urllib.parse.quote(jp_text())
     return (
         '<link rel="preconnect" href="https://fonts.googleapis.com">'
         '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
@@ -165,10 +175,9 @@ def font_links():
 
 
 NAV = [
-    ("/talent/", "Roster", "roster"),
-    ("/#agency", "Agency", "agency"),
-    ("/book/", "Book talent", "book"),
-    ("/apply/", "Apply", "apply"),
+    ("/talent/", "Talent categories", "categories"),
+    ("/apply/", "Talent interest", "interest"),
+    ("/book/", "Planning note", "planning"),
 ]
 
 
@@ -176,7 +185,10 @@ def nav_html(current):
     parts = []
     for href, label, key in NAV:
         cur = ' aria-current="page"' if key == current else ""
-        parts.append(f'<a href="{href}"{cur}>{label}</a>')
+        count = ""
+        if key == "planning":
+            count = ' <span class="count" data-brief-count hidden></span>'
+        parts.append(f'<a href="{href}"{cur}>{label}{count}</a>')
     return "".join(parts)
 
 
@@ -191,7 +203,7 @@ def head(title, desc, path, current="", extra_ld=(), body_class=""):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#fbfbf8">
+<meta name="theme-color" content="#F3EEE4">
 <title>{e(title)}</title>
 <meta name="description" content="{e(desc)}">
 <link rel="canonical" href="{url}">
@@ -212,11 +224,10 @@ def head(title, desc, path, current="", extra_ld=(), body_class=""):
 <link rel="stylesheet" href="/styles.css">
 {lds}
 </head>
-<body class="{body_class}" data-inquiry-email="{e(INQUIRY_EMAIL)}">
+<body class="{body_class}" data-license-status="{e(LICENSE_STATUS)}">
 <a class="skip" href="#main">Skip to content</a>
 <header class="mast">
 <a class="wordmark" href="/">Anistar</a>
-<button class="menu-btn" type="button" aria-expanded="false" aria-controls="primary-nav">Menu</button>
 <nav id="primary-nav" class="primary" aria-label="Primary">{nav_html(current)}</nav>
 </header>
 """
@@ -225,28 +236,21 @@ def head(title, desc, path, current="", extra_ld=(), body_class=""):
 def foot():
     divs = "".join(f'<a href="/talent/{slug(d)}/">{e(d)}</a>' for d, _, _ in T)
     return f"""<footer class="foot">
+<p class="status">{e(STATUS)}</p>
 <a class="wordmark" href="/">Anistar</a>
-<p>Talent representation for anime, manga, comics, and games.</p>
 <p class="foot-jp" lang="ja">{FOOTER_JP}</p>
 <nav aria-label="Footer">{nav_html("")}</nav>
-<nav class="foot-divs" aria-label="Fields">{divs}</nav>
+<nav class="foot-divs" aria-label="Divisions">{divs}</nav>
 <p class="colophon">© 2026 Anistar Agency</p>
-<p class="colophon"><a href="/credits/">Photography via Unsplash</a></p>
+<p class="colophon"><a href="/credits/">Image file credits</a></p>
 </footer>
 <script src="/app.js" defer></script>
 </body></html>
 """
 
 
-def shot(src, ratio, kicker, caption):
-    img = f'<img src="{e(src)}" alt="">' if os.path.isfile(src.lstrip("/")) else ""
-    kick = f'<span class="kicker" lang="ja">{e(kicker)}</span>' if kicker else ""
-    text = f" {e(caption)}" if caption else ""
-    cap = f"<figcaption>{kick}{text}</figcaption>" if (kicker or caption) else ""
-    return (
-        f'<figure class="shot"><div class="mat" style="aspect-ratio:{ratio}">'
-        f'{img}<span class="filemark" aria-hidden="true">{e(src)}</span></div>{cap}</figure>'
-    )
+def status_html():
+    return f'<p class="status">{e(STATUS)}</p>'
 
 
 def crumbs(items):
@@ -260,278 +264,312 @@ def crumbs(items):
     }
 
 
-def founder_fig(f):
-    src = f["img"]
-    if os.path.isfile(src.lstrip("/")):
-        return shot(src, f["ratio"], "創業者", "")
-    mark = e(f["name"].split()[0][:1])
+def add_button(name):
     return (
-        f'<figure class="shot"><div class="plate" style="aspect-ratio:{f["ratio"]}">'
-        f'<span class="plate-mark" aria-hidden="true">{mark}</span>'
-        f"</div></figure>"
+        f'<button type="button" class="brief-add" data-brief="{e(name)}" aria-pressed="false">Add</button>'
     )
 
 
 def founders_html():
     bits = []
-    for f in FOUNDERS:
-        fig = founder_fig(f)
+    for founder in FOUNDERS:
+        links = "".join(
+            f'<li><a href="{e(href)}">{e(label)}</a></li>' for href, label in founder["links"]
+        )
         bits.append(
-            f'<article class="person">{fig}<h3>{e(f["name"])}</h3>'
-            f'<p class="role">{e(f["role"])}</p><p>{e(f["bio"])}</p>'
-            f'<p><a href="{e(f["link"])}">{e(f["link_label"])}</a></p></article>'
+            f'<article class="person"><h3>{e(founder["name"])}</h3>'
+            f'<p class="role">{e(founder["role"])}</p><p>{e(founder["bio"])}</p>'
+            f'<ul class="url-list">{links}</ul></article>'
         )
     return "".join(bits)
 
 
-def spread():
+def hero_index():
     bits = []
-    for name, ratio, cls, blurb in FEATURED:
-        meta = META[name]
-        s = slug(name)
-        fig = shot(f"/img/talent-{s}.jpg", ratio, meta["jp"], meta["cap"])
+    for division, _, _cs in T:
+        meta = META[division]
+        cls = ' class="lead"' if division in LEADS else ""
         bits.append(
-            f'<article class="feature {cls}">{fig}<h3><a href="/talent/{s}/">{e(name)}</a></h3><p>{e(blurb)}</p></article>'
+            f'<li{cls}><a href="#{slug(division)}"><span class="side-name">{e(division)}</span>'
+            f'<span class="side-jp" lang="ja">{e(meta["jp"])}</span></a></li>'
         )
-    return "".join(bits)
+    return f'<ol class="side-index">{"".join(bits)}</ol>'
 
 
-def toc():
+def index_blocks():
     bits = []
-    for d, _, _ in T:
-        meta = META[d]
-        cls = "toc-item lead" if d in LEADS else "toc-item"
+    for division, _, categories in T:
+        meta = META[division]
+        layout = LEAD_LAYOUT.get(division, "")
+        cls = f"index-block {layout}".strip()
+        items = []
+        for name, _desc, _roles in categories:
+            items.append(
+                f'<li><a href="/talent/{slug(division)}/#{slug(name)}">{e(name)}</a>{add_button(name)}</li>'
+            )
         bits.append(
-            f'<a class="{cls}" href="/talent/{slug(d)}/"><span class="toc-name">{e(d)}</span>'
-            f'<span class="toc-jp" lang="ja">{e(meta["jp"])}</span>'
-            f'<span class="toc-lede">{e(meta["lede"])}</span></a>'
+            f'<article class="{cls}" id="{slug(division)}">'
+            f'<div class="index-copy"><h3><a href="/talent/{slug(division)}/">{e(division)}</a></h3>'
+            f'<p class="jp" lang="ja">{e(meta["jp"])}</p>'
+            f'<p class="count">{len(categories)} categories</p>'
+            f'<p>{e(meta["lede"])}</p></div>'
+            f'<ul class="cat-list">{"".join(items)}</ul></article>'
         )
     return "".join(bits)
 
 
-def field_section(i, d, cs, with_photo):
-    meta = META[d]
-    s = slug(d)
-    head_blob = " ".join([d, meta["jp"], meta["lede"]]).lower()
+def field_section(division, categories):
+    meta = META[division]
+    head_blob = " ".join([division, meta["jp"], meta["lede"]]).lower()
     items = []
-    for n, ds, r in cs:
-        blob = " ".join([n, ds, r, d]).lower()
+    for name, desc, roles in categories:
+        blob = " ".join([name, desc, roles, division]).lower()
         items.append(
-            f'<li data-search="{e(blob)}"><a href="/talent/{s}/#{slug(n)}">{e(n)}</a></li>'
+            f'<li data-search="{e(blob)}"><a href="/talent/{slug(division)}/#{slug(name)}">{e(name)}</a>{add_button(name)}</li>'
         )
-    photo = shot(f"/img/talent-{s}.jpg", "3 / 4", meta["jp"], meta["cap"]) if with_photo else ""
-    cls = "field with-photo" if with_photo else "field"
     return (
-        f'<section class="{cls}" id="{s}" data-search="{e(head_blob)}">'
-        f'<div class="field-copy"><h2><a href="/talent/{s}/">{e(d)}</a></h2>'
+        f'<section class="field" id="{slug(division)}" data-division="{e(division)}" data-search="{e(head_blob)}">'
+        f'<div class="field-copy"><h2><a href="/talent/{slug(division)}/">{e(division)}</a></h2>'
         f'<p class="jp" lang="ja">{e(meta["jp"])}</p><p class="lede">{e(meta["lede"])}</p></div>'
-        f"{photo}<ul class=\"names\">{''.join(items)}</ul></section>"
+        f'<ul class="cat-list">{"".join(items)}</ul></section>'
     )
+
+
+def filters():
+    buttons = [
+        '<button type="button" class="filter" data-division="all" aria-pressed="true">All divisions</button>'
+    ]
+    for division, _, _categories in T:
+        buttons.append(
+            f'<button type="button" class="filter" data-division="{e(division)}" aria-pressed="false">{e(division)}</button>'
+        )
+    return f'<div class="filters" role="group" aria-label="Filter by division">{"".join(buttons)}</div>'
 
 
 PROJECTS = [
     "Convention or live event",
-    "Brand campaign or sponsorship",
-    "Publishing or media launch",
-    "Commission or production work",
-    "Licensing or IP project",
+    "Publishing or media project",
+    "Brand project",
+    "Production or commission",
+    "Licensing project",
     "Other",
 ]
-BUDGETS = ["Under $5k", "$5k to $25k", "$25k to $100k", "$100k+"]
+
+
+def division_select(required):
+    opts = "".join(f'<option value="{e(d)}">{e(d)}</option>' for d, _, _ in T)
+    req = " required" if required else ""
+    label = "Choose a division" if required else "If you know it"
+    return f'<select name="division" data-label="the division"{req}><option value="">{label}</option>{opts}</select>'
 
 
 def specialty_select(required):
     groups = []
-    for d, _, cs in T:
-        opts = "".join(f'<option>{e(n)}</option>' for n, _, _ in cs)
-        groups.append(f'<optgroup label="{e(d)}">{opts}</optgroup>')
+    for division, _, categories in T:
+        opts = "".join(f'<option value="{e(name)}">{e(name)}</option>' for name, _, _ in categories)
+        groups.append(f'<optgroup label="{e(division)}">{opts}</optgroup>')
     req = " required" if required else ""
-    label = "Choose a field" if required else "If you know it"
-    return f'<select name="specialty" data-label="Field"{req}><option value="">{label}</option>{"".join(groups)}</select>'
+    label = "Choose a category" if required else "If you know it"
+    return (
+        f'<select name="specialty" data-label="the category"{req}>'
+        f'<option value="">{label}</option>{"".join(groups)}</select>'
+    )
 
 
-def division_select():
-    opts = "".join(f'<option>{e(d)}</option>' for d, _, _ in T)
-    return f'<select name="division" data-label="Field"><option value="">Choose a field</option>{opts}</select>'
+def specialty_picker():
+    groups = []
+    for division, _, categories in T:
+        opts = "".join(f'<option value="{e(name)}">{e(name)}</option>' for name, _, _ in categories)
+        groups.append(f'<optgroup label="{e(division)}">{opts}</optgroup>')
+    return (
+        '<label class="picker"><span>Add a category from the map</span>'
+        f'<select data-brief-picker><option value="">Choose a category</option>{"".join(groups)}</select></label>'
+    )
 
 
 def result_block():
     return (
         '<div class="result" data-result hidden>'
-        '<p data-result-msg tabindex="-1"></p>'
-        '<textarea readonly rows="8" data-result-text aria-label="Your note"></textarea>'
-        '<button class="btn" type="button" data-copy>Copy this note</button>'
+        '<p data-result-msg tabindex="-1" aria-live="polite"></p>'
+        '<textarea readonly rows="8" data-result-text aria-label="Note to copy"></textarea>'
+        '<button class="textbtn" type="button" data-copy>Copy this note</button>'
         "</div>"
     )
 
 
 def write(path, text):
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(text)
+    with open(path, "w", encoding="utf-8") as handle:
+        handle.write(text)
 
 
 def main():
     site_ld = {"@context": "https://schema.org", "@type": "WebSite", "name": "Anistar Agency", "url": BASE + "/"}
-    home = open("template.html", encoding="utf-8").read()
+    home = Path("template.html").read_text(encoding="utf-8")
     rep = {
         "HEAD": head(
             "Anistar Agency",
-            "Anistar is a talent agency for anime, cosplay, and creator talent, and for manga, comics, and games.",
+            HOME_DESC,
             "/",
             extra_ld=(site_ld,),
             body_class="home",
         ),
+        "STATUS": STATUS,
         "FOOT": foot(),
-        "COVER": shot("/img/cover.jpg", "3 / 4", "表紙", "A convention, a booth, or a premiere."),
-        "SPREAD": spread(),
-        "TOC": toc(),
+        "HERO_INDEX": hero_index(),
         "FOUNDERS": founders_html(),
+        "INDEX": index_blocks(),
     }
-    for k, v in rep.items():
-        home = home.replace("{{" + k + "}}", v)
+    for key, value in rep.items():
+        home = home.replace("{{" + key + "}}", value)
     assert "{{" not in home, re.findall(r"\{\{\w+\}\}", home)
     write("index.html", home)
 
-    roster_ld = crumbs([("Anistar Agency", "/"), ("Roster", "/talent/")])
-    fields = "".join(
-        field_section(i, d, cs, i in ROSTER_PHOTOS) for i, (d, _, cs) in enumerate(T)
-    )
+    roster_ld = crumbs([("Anistar Agency", "/"), ("Talent categories", "/talent/")])
+    fields = "".join(field_section(division, categories) for division, _, categories in T)
     roster = head(
-        "Roster | Anistar Agency",
-        "Fields Anistar represents, from illustrators and cosplayers to voice actors, streamers, esports teams, and game studios.",
+        "Talent categories | Anistar Agency",
+        "Sixteen divisions and 135 categories. No individual talent is listed. Anistar is in development.",
         "/talent/",
-        current="roster",
+        current="categories",
         extra_ld=(roster_ld,),
         body_class="roster",
     )
-    roster += f"""<main id="main" class="page">
-<h1>Roster</h1>
-<p class="page-kana" lang="ja">ロスター</p>
-<p class="dek">The fields Anistar represents. A person is named here only after they have agreed to be listed.</p>
-<form class="finder" id="finder" role="search" action="/talent/" method="get">
-<label for="q">Search the roster</label>
+    roster += f"""<main id="main" class="page" tabindex="-1">
+{status_html()}
+<h1>Talent categories</h1>
+<p class="page-kana" lang="ja">カテゴリ</p>
+<p class="dek">Sixteen divisions and 135 categories. Esports teams and game studios are talent categories. A person is named here only after they have agreed to be listed. Nobody is listed yet.</p>
+<form class="finder" id="finder" role="search" action="/talent/" method="get" onsubmit="event.preventDefault()">
+<label for="q">Search categories</label>
 <input id="q" name="q" type="search" autocomplete="off">
-<button class="linkish" id="clear" type="button" hidden>Clear</button>
+<button class="textbtn" id="clear" type="button" hidden>Clear</button>
 </form>
+{filters()}
 <p id="count" role="status" aria-live="polite"></p>
 <div class="roster">{fields}</div>
-<p id="none" class="none-msg" hidden>Nothing in the roster matches that search.</p>
+<p id="none" class="none-msg" hidden>No category matches that search.</p>
 </main>"""
     roster += foot()
     write("talent/index.html", roster)
 
-    nd = len(T)
-    for i, (d, _, cs) in enumerate(T):
-        s = slug(d)
-        meta = META[d]
-        prev_d = T[i - 1][0]
-        next_d = T[(i + 1) % nd][0]
-        desc = meta["lede"]
-        bc = crumbs([("Anistar Agency", "/"), ("Roster", "/talent/"), (d, f"/talent/{s}/")])
+    total = len(T)
+    for index, (division, _, categories) in enumerate(T):
+        division_slug = slug(division)
+        meta = META[division]
+        prev_name = T[index - 1][0]
+        next_name = T[(index + 1) % total][0]
+        trail = crumbs([("Anistar Agency", "/"), ("Talent categories", "/talent/"), (division, f"/talent/{division_slug}/")])
         cats = []
-        for n, ds, r in cs:
+        for name, desc, roles in categories:
             cats.append(
-                f'<li id="{slug(n)}"><h2>{e(n)}</h2><p>{e(ds)}</p>'
-                f'<p class="roles"><span class="sr">Roles in this field. </span>{e(r)}</p></li>'
+                f'<li id="{slug(name)}"><div class="cat-head"><h2>{e(name)}</h2>{add_button(name)}</div>'
+                f'<div class="cat-body"><p>{e(desc)}</p>'
+                f'<p class="roles"><span class="sr">Example roles. </span>{e(roles)}</p></div></li>'
             )
-        side = "side-left" if i % 2 else ""
+        quoted = urllib.parse.quote(division)
         page = head(
-            f"{d} | Anistar Agency",
-            desc,
-            f"/talent/{s}/",
-            current="roster",
-            extra_ld=(bc,),
+            f"{division} | Anistar Agency",
+            meta["lede"] + " Anistar is in development.",
+            f"/talent/{division_slug}/",
+            current="categories",
+            extra_ld=(trail,),
             body_class="division",
         )
-        page += f"""<main id="main" class="page {side}">
-<p class="where"><a href="/talent/">Roster</a></p>
+        page += f"""<main id="main" class="page" tabindex="-1">
+{status_html()}
+<p class="where"><a href="/talent/">Talent categories</a></p>
 <div class="div-top">
 <div class="div-copy">
-<h1>{e(d)}</h1>
+<h1>{e(division)}</h1>
 <p class="page-kana" lang="ja">{e(meta["jp"])}</p>
 <p class="dek">{e(meta["lede"])}</p>
-<p class="div-links"><a href="/book/?division={urllib.parse.quote(d)}">Book from this field</a><a href="/apply/">Apply with work in this field</a></p>
+<div class="div-links"><a class="btn" href="/apply/?division={quoted}">Talent interest</a><a class="textlink" href="/book/?division={quoted}">Client planning note</a></div>
+<p class="quiet">Nothing is sent from either page. This division lists categories, not people.</p>
 </div>
-{shot(f"/img/talent-{s}.jpg", "4 / 5", meta["jp"], meta["cap"])}
+<p class="div-note">Add a category to the planning note if a future project might need it. The list stays in this browser.</p>
 </div>
 <div class="cats-wrap"><ol class="cats">{''.join(cats)}</ol></div>
-<nav class="pager" aria-label="Other fields">
-<a href="/talent/{slug(prev_d)}/"><span>Previous</span>{e(prev_d)}</a>
-<a href="/talent/{slug(next_d)}/"><span>Next</span>{e(next_d)}</a>
+<nav class="pager" aria-label="Other divisions">
+<a href="/talent/{slug(prev_name)}/"><span>Previous</span>{e(prev_name)}</a>
+<a href="/talent/{slug(next_name)}/"><span>Next</span>{e(next_name)}</a>
 </nav>
 </main>"""
         page += foot()
-        write(f"talent/{s}/index.html", page)
+        write(f"talent/{division_slug}/index.html", page)
 
-    book_ld = crumbs([("Anistar Agency", "/"), ("Book talent", "/book/")])
-    project_opts = "".join(f"<option>{e(p)}</option>" for p in PROJECTS)
-    budget_opts = "".join(f"<option>{e(b)}</option>" for b in BUDGETS)
-    book = head(
-        "Book talent | Anistar Agency",
-        "Tell Anistar who you need to hire, and for what. Conventions, publishers, brands, and productions.",
+    plan_ld = crumbs([("Anistar Agency", "/"), ("Client planning note", "/book/")])
+    project_opts = "".join(f'<option value="{e(project)}">{e(project)}</option>' for project in PROJECTS)
+    plan = head(
+        "Client planning note | Anistar Agency",
+        "Prepare a planning note for your own records. Anistar does not book talent from this page, and nothing is sent.",
         "/book/",
-        current="book",
-        extra_ld=(book_ld,),
+        current="planning",
+        extra_ld=(plan_ld,),
         body_class="formpage",
     )
-    book += f"""<main id="main" class="page">
+    plan += f"""<main id="main" class="page" tabindex="-1">
+{status_html()}
 <div class="sheet">
-<div>
-<h1>Book talent</h1>
-<p class="dek">Tell us the job. A convention guest, a campaign, a recording, a commission. Name the field if you know it.</p>
-<p class="quiet">We do not store this note on a server. If mail is not connected, the only copy is the one you take with you.</p>
+<div class="sheet-copy">
+<h1>Client planning note</h1>
+<p class="dek">Use this page to draft which categories a future project might need. Anistar cannot book talent from it.</p>
+<p class="quiet">Nothing is sent. Nothing is stored on a server. Leave out personal contact details. This page cannot upload files.</p>
 </div>
-<form class="form" id="inquiry-form" novalidate>
-<div class="pair">
-<label class="line"><span>Your name <span class="req">Required</span></span><input name="name" data-label="your name" required autocomplete="name"></label>
-<label class="line"><span>Email <span class="req">Required</span></span><input name="email" data-label="your email" type="email" required autocomplete="email"></label>
+<div class="sheet-form">
+<div class="shortlist">
+<h2>Categories on this note</h2>
+<p data-brief-empty>No categories yet. Add them from a division page, or choose one below. They stay in this browser only.</p>
+<ul data-brief-list></ul>
+{specialty_picker()}
 </div>
-<label class="line"><span>Company or organization</span><input name="org" autocomplete="organization"></label>
+<form class="form" id="inquiry-form" method="post" action="/book/" novalidate onsubmit="event.preventDefault()" autocomplete="off" data-nosend="true">
+<label class="line"><span>Organization <span class="req">Required</span></span><input name="org" data-label="the organization" required autocomplete="organization"></label>
 <div class="pair">
 <label class="line"><span>Project type <span class="req">Required</span></span><select name="type" data-label="the project type" required><option value="">Choose one</option>{project_opts}</select></label>
 <label class="line"><span>Timing, if you know it</span><input name="timing" autocomplete="off"></label>
 </div>
 <div class="pair">
-<label class="line"><span>Field</span>{division_select()}</label>
-<label class="line"><span>Budget range</span><select name="budget"><option value="">Prefer not to say</option>{budget_opts}</select></label>
+<label class="line"><span>City, if you know it</span><input name="city" autocomplete="off"></label>
+<label class="line"><span>Division</span>{division_select(False)}</label>
 </div>
-<label class="line"><span>Closest specialty</span>{specialty_select(False)}</label>
-<label class="line"><span>The job <span class="req">Required</span></span><textarea name="details" data-label="the job" rows="5" required></textarea></label>
-<button class="btn" type="submit">Write the note</button>
+<label class="line"><span>Category</span>{specialty_select(False)}</label>
+<label class="line"><span>What the project would need <span class="req">Required</span></span><textarea name="details" data-label="what the project would need" rows="5" required></textarea></label>
+<button class="btn" type="button" data-prepare>Prepare a copy</button>
 <p class="form-error" role="alert" hidden></p>
 {result_block()}
 </form>
 </div>
+</div>
 </main>"""
-    book += foot()
-    write("book/index.html", book)
+    plan += foot()
+    write("book/index.html", plan)
 
-    apply_ld = crumbs([("Anistar Agency", "/"), ("Apply", "/apply/")])
+    apply_ld = crumbs([("Anistar Agency", "/"), ("Talent interest", "/apply/")])
     apply = head(
-        "Apply for representation | Anistar Agency",
-        "Apply to be represented by Anistar. Send the work: a portfolio, a channel, credits, or a team page.",
+        "Talent interest | Anistar Agency",
+        "Prepare a talent interest note for your own records. Nothing is sent, and this is not a representation agreement.",
         "/apply/",
-        current="apply",
+        current="interest",
         extra_ld=(apply_ld,),
         body_class="formpage",
     )
-    apply += f"""<main id="main" class="page">
+    apply += f"""<main id="main" class="page" tabindex="-1">
+{status_html()}
 <div class="sheet">
-<div>
-<h1>Apply for representation</h1>
-<p class="dek">Send the work. A portfolio, a channel, credits, or a team page. One field is enough. A team applies as one entry.</p>
-<p class="quiet">We do not store this note on a server. If mail is not connected, the only copy is the one you take with you.</p>
+<div class="sheet-copy">
+<h1>Talent interest</h1>
+<p class="dek">For adults who may want to talk with Anistar later. Preparing a copy does not create a representation agreement.</p>
+<p class="quiet">Nothing is sent. Nothing is stored on a server. Use one public URL. Do not include a private address, a phone number, or files. You must be 18 or older.</p>
 </div>
-<form class="form" id="apply-form" novalidate>
-<div class="pair">
-<label class="line"><span>Name or team <span class="req">Required</span></span><input name="name" data-label="your name" required autocomplete="name"></label>
-<label class="line"><span>Email <span class="req">Required</span></span><input name="email" data-label="your email" type="email" required autocomplete="email"></label>
-</div>
-<label class="line"><span>Field <span class="req">Required</span></span>{specialty_select(True)}</label>
-<label class="line"><span>Portfolio and links <span class="req">Required</span></span><textarea name="links" data-label="your links" rows="4" required></textarea></label>
-<label class="line"><span>About the work</span><textarea name="about" rows="4"></textarea></label>
-<button class="btn" type="submit">Write the note</button>
+<form class="form" id="apply-form" method="post" action="/apply/" novalidate onsubmit="event.preventDefault()" autocomplete="off" data-nosend="true">
+<label class="line"><span>Public name <span class="req">Required</span></span><input name="name" data-label="a public name" required autocomplete="name"></label>
+<label class="line"><span>Division <span class="req">Required</span></span>{division_select(True)}</label>
+<label class="line"><span>Category <span class="req">Required</span></span>{specialty_select(True)}</label>
+<label class="line"><span>Public URL <span class="req">Required</span></span><input name="url" data-label="a public URL" type="url" inputmode="url" placeholder="https://" required autocomplete="url"></label>
+<label class="line"><span>Note</span><textarea name="about" rows="4"></textarea></label>
+<label class="check"><input name="adult" value="yes" type="checkbox" data-label="the confirmation that you are 18 or older" required><span>I am 18 or older. I understand this note is not sent and is not a representation agreement.</span></label>
+<button class="btn" type="button" data-prepare>Prepare a copy</button>
 <p class="form-error" role="alert" hidden></p>
 {result_block()}
 </form>
@@ -542,22 +580,23 @@ def main():
 
     missing_page = head(
         "Page not found | Anistar Agency",
-        "This page is not on the Anistar Agency site.",
+        "This page is not on the Anistar site.",
         "/404",
         body_class="missing",
     )
-    missing_page += """<main id="main" class="miss">
+    missing_page += f"""<main id="main" class="miss" tabindex="-1">
+{status_html()}
 <h1>This page is not on the site</h1>
-<p>The address does not match a roster page, a booking note, or an application.</p>
+<p>The address does not match a category, a talent interest note, or a client planning note.</p>
 <p><a href="/">Return to Anistar</a></p>
 </main>"""
     missing_page += foot()
     write("404.html", missing_page)
 
-    credits_ld = crumbs([("Anistar Agency", "/"), ("Photography", "/credits/")])
+    credits_ld = crumbs([("Anistar Agency", "/"), ("Image file credits", "/credits/")])
     credits = head(
-        "Photography | Anistar Agency",
-        "Photographs on the Anistar Agency site, credited to their Unsplash photographers.",
+        "Image file credits | Anistar Agency",
+        "Unsplash files stored with the Anistar project. They are not pictures of Anistar talent or clients.",
         "/credits/",
         extra_ld=(credits_ld,),
     )
@@ -567,13 +606,15 @@ def main():
             "<li>"
             f'<p class="credit-where">{e(where)}</p>'
             f'<p class="credit-file">/img/{e(file)}</p>'
-            f'<p><a href="{e(profile)}">{e(name)}</a></p>'
-            f'<p><a href="{e(photo)}">View on Unsplash</a></p>'
+            f'<p><a href="{e(profile)}">{e(profile)}</a></p>'
+            f'<p><a href="{e(photo)}">{e(photo)}</a></p>'
+            f"<p>{e(name)}</p>"
             "</li>"
         )
-    credits += f"""<main id="main" class="page">
-<h1>Photography</h1>
-<p class="dek">Photographs on this site come from Unsplash, under the <a href="https://unsplash.com/license">Unsplash License</a>. They show places, tools, and crowds in the fields Anistar represents. Henry Finn and Ko Mori are set in type. Their portraits will be their own photographs.</p>
+    credits += f"""<main id="main" class="page" tabindex="-1">
+{status_html()}
+<h1>Image file credits</h1>
+<p class="dek">These files are stored with the project under /img. They come from Unsplash, under the <a href="https://unsplash.com/license">Unsplash License</a>. They are photographs of places and tools. They are not pictures of Anistar talent, clients, or events, and the public pages do not use them as a roster.</p>
 <ol class="credits">
 {"".join(rows)}
 </ol>
@@ -584,9 +625,9 @@ def main():
     lines = [
         "# Photography credits",
         "",
-        "Photographs on this site are from Unsplash, under the Unsplash License: https://unsplash.com/license",
+        "Image files under img/ are from Unsplash, under the Unsplash License: https://unsplash.com/license",
         "",
-        "Henry Finn and Ko Mori are set in type, waiting for their own portraits.",
+        "Public pages do not display them. They are not pictures of Anistar talent, clients, or events.",
         "",
         "| File | Well | Photographer | Profile | Unsplash photo |",
         "|---|---|---|---|---|",
@@ -597,7 +638,7 @@ def main():
     write("img/CREDITS.md", "\n".join(lines))
 
     urls = [BASE + "/", BASE + "/talent/", BASE + "/book/", BASE + "/apply/", BASE + "/credits/"]
-    urls += [f"{BASE}/talent/{slug(d)}/" for d, _, _ in T]
+    urls += [f"{BASE}/talent/{slug(division)}/" for division, _, _ in T]
     write(
         "sitemap.xml",
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
@@ -606,20 +647,20 @@ def main():
     )
     write("robots.txt", f"User-agent: *\nAllow: /\nSitemap: {BASE}/sitemap.xml\n")
 
-    with open("taxonomy.csv", "w", newline="", encoding="utf-8") as f:
-        w = csv.writer(f)
-        w.writerow(["Division", "Category", "Description", "Example roles", "Roster status"])
-        for d, _, cs in T:
-            for n, ds, r in cs:
-                w.writerow([d, n, ds, r, "Not published"])
-    md = "# Anistar Agency Talent Taxonomy\n\nAnime, manga, comics, webtoons, and gaming. No individual talent is listed.\n"
-    for d, _, cs in T:
-        md += f"\n## {d}\n\n| Category | Description | Example roles |\n|---|---|---|\n"
-        md += "".join(f"| {n} | {ds} | {r} |\n" for n, ds, r in cs)
+    with open("taxonomy.csv", "w", newline="", encoding="utf-8") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(["Division", "Category", "Description", "Example roles", "Roster status"])
+        for division, _, categories in T:
+            for name, desc, roles in categories:
+                writer.writerow([division, name, desc, roles, "Not published"])
+    md = "# Anistar Agency Talent Taxonomy\n\nAnime, manga, comics, webtoons, and gaming. No individual talent is listed. Esports teams and game studios are talent categories.\n"
+    for division, _, categories in T:
+        md += f"\n## {division}\n\n| Category | Description | Example roles |\n|---|---|---|\n"
+        md += "".join(f"| {name} | {desc} | {roles} |\n" for name, desc, roles in categories)
     write("TAXONOMY.md", md)
 
     files = ["index.html", "404.html", "talent/index.html", "book/index.html", "apply/index.html", "credits/index.html"]
-    files += [f"talent/{slug(d)}/index.html" for d, _, _ in T]
+    files += [f"talent/{slug(division)}/index.html" for division, _, _ in T]
     banned = [
         "EST. 2026",
         "PLACEHOLDER",
@@ -641,23 +682,34 @@ def main():
         "Two clear paths",
         "system-ui",
         "Instrument Serif",
+        "Book talent",
+        "hello@anistar.agency",
+        "hire through us",
+        "hire through the agency",
+        "Apply for representation",
+        "mailto:",
+        "Labor Code",
+        "privacy policy",
+        "Terms of",
+        "we will reply",
+        "family=Inter",
+        "family=Geist",
+        "Bodoni",
+        "gradient(",
     ]
     hits = []
     for path in files:
-        text = open(path, encoding="utf-8").read()
-        for b in banned:
-            if b in text:
-                hits.append((path, b))
+        text = Path(path).read_text(encoding="utf-8")
+        for phrase in banned:
+            if phrase in text:
+                hits.append((path, phrase))
         if any(ord(ch) > 0x1F000 or 0x2600 <= ord(ch) <= 0x27BF for ch in text):
             hits.append((path, "emoji"))
+        if "<img" in text or "filemark" in text:
+            hits.append((path, "image-box"))
     if hits:
-        raise SystemExit("banned copy found: " + repr(hits[:20]))
+        raise SystemExit("banned copy found: " + repr(hits[:30]))
     print("pages", len(files))
-    print("images")
-    for src in ["/img/cover.jpg", "/img/henry-finn.jpg", "/img/ko-mori.jpg"] + [
-        f"/img/talent-{slug(d)}.jpg" for d, _, _ in T
-    ]:
-        print(src)
 
 
 if __name__ == "__main__":
