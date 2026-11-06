@@ -73,7 +73,6 @@ class SiteTests(unittest.TestCase):
             "0N1",
             "Animori",
             "Unicorn Studios",
-            "type=\"email\"",
             "type=\"file\"",
             "type=\"submit\"",
             "filemark",
@@ -88,13 +87,23 @@ class SiteTests(unittest.TestCase):
             self.assertNotRegex(text, r"[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}")
         home = (ROOT / "index.html").read_text()
         self.assertIn(">Explore talent categories<", home)
-        self.assertIn(">Talent interest<", home)
+        self.assertIn(">Talent application<", home)
         self.assertIn(">Client planning note<", home)
+        self.assertIn("Connecting talent across East and West", home)
+        self.assertIn("North America, South America, Japan, Europe, and the Middle East", home)
+        for title in (
+            "Maquia: When the Promised Flower Blooms",
+            "Penguin Highway",
+            "Ryoma! The Prince of Tennis",
+            "Millennium Actress",
+            "A Silent Voice",
+        ):
+            self.assertIn(title, home)
         self.assertIn("https://henryfinn.com", home)
         self.assertIn("Henry Finn is a co-founder of Anistar.", home)
         self.assertIn("https://www.elevenarts.net/", home)
         self.assertIn("https://www.instagram.com/eleven_arts/", home)
-        self.assertIn("He leads ELEVEN ARTS.", home)
+        self.assertIn("Founder and CEO of ELEVEN ARTS.", home)
         self.assertIn("does not recruit through the ELEVEN ARTS Instagram account.", home)
         self.assertFalse((ROOT / "privacy" / "index.html").exists())
         self.assertFalse((ROOT / "terms" / "index.html").exists())
@@ -113,22 +122,28 @@ class SiteTests(unittest.TestCase):
         self.assertIn("not a representation agreement", apply)
         self.assertIn("I am 18 or older.", apply)
         self.assertIn("cannot book talent", plan)
-        self.assertNotIn("name=\"email\"", apply)
+        self.assertIn('name="email"', apply)
+        self.assertIn('type="email"', apply)
         self.assertNotIn("name=\"email\"", plan)
+        self.assertNotIn('type="email"', plan)
         self.assertNotIn("name=\"age\"", apply)
+        self.assertNotIn('type="file"', apply)
         self.assertIn("data-brief-list", plan)
         self.assertNotIn("data-brief-list", apply)
-        self.assertIn(">Prepare a copy<", apply)
+        self.assertIn(">Prepare application<", apply)
+        self.assertIn(">Copy application<", apply)
         self.assertIn(">Prepare a copy<", plan)
+        self.assertIn("Accepting talent applications for our founding roster.", apply)
+        self.assertIn("Maquia: When the Promised Flower Blooms", apply)
         script = (ROOT / "app.js").read_text()
         for phrase in ("fetch(", "XMLHttpRequest", "sendBeacon", "mailto:", "gtag", "supabase", "plausible"):
             self.assertNotIn(phrase, script)
         self.assertIn("anistar-brief", script)
         self.assertIn("localStorage", script)
-        self.assertIn("ANISTAR TALENT INTEREST NOTE", script)
+        self.assertIn("ANISTAR TALENT APPLICATION", script)
         self.assertIn("ANISTAR PLANNING NOTE", script)
         self.assertIn("Nothing was sent. Anistar did not receive this note.", script)
-        talent_fn = script.split("ANISTAR TALENT INTEREST NOTE")[1].split("].join")[0]
+        talent_fn = script.split("ANISTAR TALENT APPLICATION")[1].split("].join")[0]
         self.assertNotIn("getB()", talent_fn)
         plan_fn = script.split("ANISTAR PLANNING NOTE")[1].split("].join")[0]
         self.assertIn("getB()", plan_fn)

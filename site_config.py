@@ -7,7 +7,7 @@ INQUIRY_EMAIL = ""
 LICENSE_STATUS = "forming"
 LICENSE_NUMBER = ""
 
-STATUS = "Anistar is in development. Talent representation and booking services are not yet available."
+STATUS = "Anistar is a new agency. This website is under construction, and representation and booking are not yet available."
 
 FOUNDERS = [
     {

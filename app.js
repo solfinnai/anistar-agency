@@ -176,6 +176,17 @@ function prefill(form) {
   if (divisionSelect && wantedDivision && [...divisionSelect.options].some((option) => option.value === wantedDivision)) {
     divisionSelect.value = wantedDivision;
   }
+  const from = $("[data-from-division]");
+  const chosen = divisionSelect?.selectedOptions?.[0];
+  if (from && chosen && chosen.value && chosen.dataset.slug) {
+    from.hidden = false;
+    from.replaceChildren();
+    from.append("Opened from ");
+    const back = document.createElement("a");
+    back.href = "/talent/" + chosen.dataset.slug + "/";
+    back.textContent = chosen.value;
+    from.append(back, ". You can change the division below.");
+  }
   syncSpecialty(form);
   if (specialty && wantedSpecialty && [...specialty.options].some((option) => option.value === wantedSpecialty && !option.disabled)) {
     specialty.value = wantedSpecialty;
@@ -186,6 +197,7 @@ function invalid(field) {
   if (field.type === "checkbox") return !field.checked;
   const value = String(field.value || "").trim();
   if (!value) return true;
+  if (field.type === "email" && !/^\S+@\S+\.\S+$/.test(value)) return true;
   if (field.type === "url") {
     try {
       const url = new URL(value);
@@ -199,9 +211,10 @@ function invalid(field) {
 
 const line = (label, value) => `${label}: ${value && String(value).trim() ? String(value).trim() : "-"}`;
 
-const NO_SEND = "Nothing was sent. Anistar did not receive this note. Copy it if you want to keep it.";
+const PLAN_MSG = "Nothing was sent. Anistar did not receive this note. Copy it if you want to keep it.";
+const APPLY_MSG = "Nothing was sent. Anistar did not receive this application. Copy it if you want to keep it.";
 
-function handle(form, build) {
+function handle(form, build, doneMessage) {
   const prepare = () => {
     const error = $(".form-error", form);
     const fields = $$("input, select, textarea", form).filter((field) => field.required || field.type === "url");
@@ -210,11 +223,14 @@ function handle(form, build) {
     bad.forEach((field) => field.setAttribute("aria-invalid", "true"));
     if (!error.id) error.id = form.id + "-error";
     if (bad.length) {
+      const emailBad = bad.find((field) => field.type === "email" && field.value.trim());
       const urlBad = bad.find((field) => field.type === "url" && field.value.trim());
       error.hidden = false;
-      error.textContent = urlBad
-        ? "Enter a public https:// address."
-        : `Please fill in ${bad.map((field) => field.dataset.label || "a field").join(", ")}.`;
+      error.textContent = emailBad
+        ? "Enter an email address that looks complete."
+        : urlBad
+          ? "Enter a public https:// address."
+          : `Please fill in ${bad.map((field) => field.dataset.label || "a field").join(", ")}.`;
       bad.forEach((field) => field.setAttribute("aria-describedby", error.id));
       bad[0].focus();
       return;
@@ -226,7 +242,7 @@ function handle(form, build) {
     const message = $("[data-result-msg]", form);
     result.hidden = false;
     $("[data-result-text]", form).value = build(data);
-    message.textContent = NO_SEND;
+    message.textContent = doneMessage;
     message.focus();
   };
   form.addEventListener("submit", (ev) => {
@@ -262,25 +278,31 @@ if (inquiry) {
       "",
       "What the project would need:",
       data.details || "-",
-    ].join("\n")
+    ].join("\n"),
+    PLAN_MSG
   );
 }
 
 const applyForm = $("#apply-form");
 if (applyForm) {
-  handle(applyForm, (data) =>
-    [
-      "ANISTAR TALENT INTEREST NOTE",
-      "Nothing was sent. This is not a representation agreement.",
-      line("Public name", data.name),
-      line("Division", data.division),
-      line("Category", data.specialty),
-      line("Public URL", data.url),
-      line("18 or older", data.adult === "yes" ? "yes" : "no"),
-      "",
-      "Note:",
-      data.about || "-",
-    ].join("\n")
+  handle(
+    applyForm,
+    (data) =>
+      [
+        "ANISTAR TALENT APPLICATION",
+        "Nothing was sent. This is not a representation agreement.",
+        line("Name or stage name", data.name),
+        line("Email", data.email),
+        line("Division", data.division),
+        line("Category", data.specialty),
+        line("Portfolio or profile URL", data.url),
+        line("Languages", data.languages),
+        line("18 or older", data.adult === "yes" ? "yes" : "no"),
+        "",
+        "Interests and goals:",
+        data.goals || "-",
+      ].join("\n"),
+    APPLY_MSG
   );
 }
 

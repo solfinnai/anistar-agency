@@ -12,8 +12,8 @@ e = lambda s: html.escape(s, quote=True)
 FOOTER_JP = "アニメ、マンガ、コミック、ゲームのタレント事務所（準備中）"
 COVER_JP = "アニメ、コスプレ、クリエイターの事務所（準備中）"
 HOME_DESC = (
-    "Anistar is in development. A category map for anime, cosplay, manga, comics, and games. "
-    "Talent representation and booking services are not yet available."
+    "Anistar is a new agency under construction, accepting founding-roster applications "
+    "from anime, cosplay, manga, comics, and games talent. Representation and booking are not yet available."
 )
 
 META = {
@@ -176,7 +176,7 @@ def font_links():
 
 NAV = [
     ("/talent/", "Talent categories", "categories"),
-    ("/apply/", "Talent interest", "interest"),
+    ("/apply/", "Talent application", "interest"),
     ("/book/", "Planning note", "planning"),
 ]
 
@@ -366,7 +366,9 @@ PROJECTS = [
 
 
 def division_select(required):
-    opts = "".join(f'<option value="{e(d)}">{e(d)}</option>' for d, _, _ in T)
+    opts = "".join(
+        f'<option value="{e(d)}" data-slug="{slug(d)}">{e(d)}</option>' for d, _, _ in T
+    )
     req = " required" if required else ""
     label = "Choose a division" if required else "If you know it"
     return f'<select name="division" data-label="the division"{req}><option value="">{label}</option>{opts}</select>'
@@ -396,14 +398,108 @@ def specialty_picker():
     )
 
 
-def result_block():
+def result_block(copy_label="Copy this note", note_label="Note to copy"):
     return (
         '<div class="result" data-result hidden>'
         '<p data-result-msg tabindex="-1" aria-live="polite"></p>'
-        '<textarea readonly rows="8" data-result-text aria-label="Note to copy"></textarea>'
-        '<button class="textbtn" type="button" data-copy>Copy this note</button>'
+        f'<textarea readonly rows="8" data-result-text aria-label="{e(note_label)}"></textarea>'
+        f'<button class="textbtn" type="button" data-copy>{e(copy_label)}</button>'
         "</div>"
     )
+
+
+# Company distribution only. Ko is not credited on this site as director or producer of these films.
+FILMS = [
+    (
+        "Maquia: When the Promised Flower Blooms",
+        "ELEVEN ARTS announced the North American theatrical release for July 20, 2018.",
+        [
+            (
+                "Anime News Network, April 12, 2018",
+                "https://www.animenewsnetwork.com/press-release/2018-04-12/eleven-arts-anime-studio-to-release-maquia-when-the-promised-flower-blooms/.130262",
+            ),
+            ("ELEVEN ARTS catalog", "https://www.elevenarts.net/anime/films"),
+        ],
+    ),
+    (
+        "Penguin Highway",
+        "ELEVEN ARTS brought the film to U.S. and Canadian cinemas beginning April 12, 2019.",
+        [
+            (
+                "SciFi Japan, citing the ELEVEN ARTS announcement",
+                "https://www.scifijapan.com/godzilla-toho/penguin-highway-comes-to-north-american-theaters-starting-april-12",
+            ),
+            ("ELEVEN ARTS title page", "https://www.elevenarts.net/titles/penguin-highway"),
+        ],
+    ),
+    (
+        "Ryoma! The Prince of Tennis",
+        "On February 19, 2022, ELEVEN ARTS announced it had acquired the North American distribution rights.",
+        [("ELEVEN ARTS news", "https://www.elevenarts.net/anime/anime-news")],
+    ),
+    (
+        "Millennium Actress",
+        "ELEVEN ARTS announced a North American theatrical run and a Blu-ray, DVD, and digital release with Shout! Factory on December 10, 2019.",
+        [
+            ("ELEVEN ARTS news", "https://www.elevenarts.net/anime/anime-news"),
+            ("ELEVEN ARTS catalog", "https://www.elevenarts.net/anime/films"),
+        ],
+    ),
+    (
+        "A Silent Voice",
+        "The film is on the ELEVEN ARTS distribution catalog. The Outerhaven reported on September 12, 2017 that ELEVEN ARTS was bringing it to U.S. theaters that October.",
+        [
+            ("ELEVEN ARTS title page", "https://www.elevenarts.net/titles/a-silent-voice"),
+            (
+                "The Outerhaven, September 12, 2017",
+                "https://www.theouterhaven.net/2017/09/u-s-screenings-silent-voice-revealed/",
+            ),
+        ],
+    ),
+]
+
+
+def films_html():
+    items = []
+    for title, note, sources in FILMS:
+        links = "".join(f'<a href="{e(href)}">{e(label)}</a>' for label, href in sources)
+        items.append(
+            f'<li><p class="film-title">{e(title)}</p><p>{e(note)}</p>'
+            f'<p class="film-sources">{links}</p></li>'
+        )
+    return f'<ul class="films">{"".join(items)}</ul>'
+
+
+def credibility_html():
+    films = films_html()
+    return f"""<section class="credibility" id="credibility" aria-labelledby="credibility-title">
+<h2 id="credibility-title">Ko Mori, Henry Finn, and the plan</h2>
+<div class="cred-grid">
+<article class="ko" id="ko">
+<p class="side-kicker">Co-founder</p>
+<h3>Ko Mori</h3>
+<p class="role">Co-founder of Anistar. Founder and CEO of ELEVEN ARTS.</p>
+<p>Ko Mori is a co-founder of Anistar and the founder and CEO of ELEVEN ARTS in Los Angeles. ELEVEN ARTS is a separate company. It releases Japanese anime for audiences in North America. That record is why Anistar's plan is connecting talent across East and West.</p>
+<p>The intended focus is representation in North America, South America, Japan, Europe, and the Middle East. Those regions are a plan. Anistar has no offices there, holds no local licenses, and does not arrange visas or cross-border jobs.</p>
+<p>ELEVEN ARTS releases include the films below. They are distribution credits for that company. They are not Anistar clients, and this list does not call Ko the director or the producer of the films.</p>
+{films}
+<ul class="url-list">
+<li><a href="https://www.elevenarts.net/">https://www.elevenarts.net/</a></li>
+<li><a href="https://www.instagram.com/eleven_arts/">https://www.instagram.com/eleven_arts/</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Eleven_Arts">https://en.wikipedia.org/wiki/Eleven_Arts</a></li>
+<li><a href="https://project-anime.org/wp-content/uploads/2020/01/2019_Project_Anime_Los_Angeles_Program_Guide.pdf">https://project-anime.org/wp-content/uploads/2020/01/2019_Project_Anime_Los_Angeles_Program_Guide.pdf</a></li>
+</ul>
+<p class="quiet">Founder and CEO is how Wikipedia's Eleven Arts entry and the 2019 Project Anime Los Angeles program describe him. The program says President and CEO. The ELEVEN ARTS about page does not name him. A link is not a partnership, and this site does not recruit through the ELEVEN ARTS Instagram account.</p>
+</article>
+<article class="henry" id="henry">
+<p class="side-kicker">Co-founder</p>
+<h3>Henry Finn</h3>
+<p class="role">Co-founder of Anistar.</p>
+<p>Henry Finn is a co-founder of Anistar. He started it with Ko Mori.</p>
+<ul class="url-list"><li><a href="https://henryfinn.com">https://henryfinn.com</a></li></ul>
+</article>
+</div>
+</section>"""
 
 
 def write(path, text):
@@ -427,6 +523,7 @@ def main():
         "FOOT": foot(),
         "HERO_INDEX": hero_index(),
         "FOUNDERS": founders_html(),
+        "CREDIBILITY": credibility_html(),
         "INDEX": index_blocks(),
     }
     for key, value in rep.items():
@@ -493,8 +590,8 @@ def main():
 <h1>{e(division)}</h1>
 <p class="page-kana" lang="ja">{e(meta["jp"])}</p>
 <p class="dek">{e(meta["lede"])}</p>
-<div class="div-links"><a class="btn" href="/apply/?division={quoted}">Talent interest</a><a class="textlink" href="/book/?division={quoted}">Client planning note</a></div>
-<p class="quiet">Nothing is sent from either page. This division lists categories, not people.</p>
+<div class="div-links"><a class="btn" href="/apply/?division={quoted}">Talent application</a><a class="textlink" href="/book/?division={quoted}">Client planning note</a></div>
+<p class="quiet">The application is a copy you prepare. Nothing is sent. This division lists categories, not people.</p>
 </div>
 <p class="div-note">Add a category to the planning note if a future project might need it. The list stays in this browser.</p>
 </div>
@@ -554,34 +651,62 @@ def main():
     plan += foot()
     write("book/index.html", plan)
 
-    apply_ld = crumbs([("Anistar Agency", "/"), ("Talent interest", "/apply/")])
+    apply_ld = crumbs([("Anistar Agency", "/"), ("Talent application", "/apply/")])
     apply = head(
-        "Talent interest | Anistar Agency",
-        "Prepare a talent interest note for your own records. Nothing is sent, and this is not a representation agreement.",
+        "Talent application | Anistar Agency",
+        "Anistar is a new agency under construction, accepting founding-roster applications from adults in anime, cosplay, manga, comics, and games. Preparing an application here does not send it.",
         "/apply/",
         current="interest",
         extra_ld=(apply_ld,),
-        body_class="formpage",
+        body_class="apply",
     )
-    apply += f"""<main id="main" class="page" tabindex="-1">
+    apply += f"""<main id="main" class="page apply" tabindex="-1">
 {status_html()}
-<div class="sheet">
-<div class="sheet-copy">
-<h1>Talent interest</h1>
-<p class="dek">For adults who may want to talk with Anistar later. Preparing a copy does not create a representation agreement.</p>
-<p class="quiet">Nothing is sent. Nothing is stored on a server. Use one public URL. Do not include a private address, a phone number, or files. You must be 18 or older.</p>
+<div class="apply-grid">
+<div class="apply-intro">
+<p class="side-kicker">New agency. Website under construction.</p>
+<h1>Accepting talent applications for our founding roster.</h1>
+<p class="dek">If you work in anime, cosplay, manga, comics, or games, you can put your name forward. This is an expression of interest. It is not a representation agreement, and it does not promise a job.</p>
+<p>No size of following is required. A team or a studio can apply under one name. Voice, music, esports, and the rest of the category map are open too.</p>
+<h2>Proposed support</h2>
+<p>These are plans for after licensing and contracts. They are not services Anistar can deliver today.</p>
+<dl class="benefits">
+<div><dt>A place in your category</dt><dd>Anistar would present your portfolio in the category that fits the work, so a reader sees a cosplayer, a mangaka, a voice actor, or a team.</dd></div>
+<div><dt>Introductions</dt><dd>Introductions to other creators in related categories, when both people want the conversation.</dd></div>
+<div><dt>Interviews and short features</dt><dd>Interviews and short features about the work, as content Anistar plans to make. A feature is not guaranteed.</dd></div>
+<div><dt>Cross-market work, after licensing</dt><dd>Brand and convention collaborations, and representation, for creators who want work to travel among North America, South America, Japan, Europe, and the Middle East. An application does not sign you, book you, set a fee, get you a visa, or open a door to a named studio.</dd></div>
+</dl>
 </div>
+<div class="apply-form">
+<h2>Prepare your application</h2>
+<p class="quiet">Prepare it, then copy it. Nothing is sent. This page does not store it. Anistar has no monitored inbox and no privacy notice yet, so nothing here is reviewed and nothing is answered. A live application needs both of those before it can be delivered.</p>
+<p data-from-division hidden></p>
 <form class="form" id="apply-form" method="post" action="/apply/" novalidate onsubmit="event.preventDefault()" autocomplete="off" data-nosend="true">
-<label class="line"><span>Public name <span class="req">Required</span></span><input name="name" data-label="a public name" required autocomplete="name"></label>
+<fieldset>
+<legend>About you</legend>
+<label class="line"><span>Name or stage name <span class="req">Required</span></span><input name="name" data-label="your name or stage name" required autocomplete="name"></label>
+<label class="line"><span>Email <span class="req">Required</span></span><input name="email" data-label="your email" type="email" inputmode="email" required autocomplete="email"></label>
+</fieldset>
+<fieldset>
+<legend>Your work</legend>
 <label class="line"><span>Division <span class="req">Required</span></span>{division_select(True)}</label>
 <label class="line"><span>Category <span class="req">Required</span></span>{specialty_select(True)}</label>
-<label class="line"><span>Public URL <span class="req">Required</span></span><input name="url" data-label="a public URL" type="url" inputmode="url" placeholder="https://" required autocomplete="url"></label>
-<label class="line"><span>Note</span><textarea name="about" rows="4"></textarea></label>
-<label class="check"><input name="adult" value="yes" type="checkbox" data-label="the confirmation that you are 18 or older" required><span>I am 18 or older. I understand this note is not sent and is not a representation agreement.</span></label>
-<button class="btn" type="button" data-prepare>Prepare a copy</button>
+<label class="line"><span>Portfolio or profile URL <span class="req">Required</span></span><input name="url" data-label="a portfolio or profile URL" type="url" inputmode="url" placeholder="https://" required autocomplete="url"></label>
+<label class="line"><span>Languages <span class="req">Required</span></span><input name="languages" data-label="the languages you work in" required autocomplete="off"></label>
+</fieldset>
+<fieldset>
+<legend>What you want</legend>
+<label class="line"><span>Interests and goals <span class="req">Required</span></span><textarea name="goals" data-label="your interests and goals" rows="4" required></textarea></label>
+</fieldset>
+<label class="check"><input name="adult" value="yes" type="checkbox" data-label="the confirmation that you are 18 or older" required><span>I am 18 or older. I understand this application is not sent and is not a representation agreement.</span></label>
+<button class="btn" type="button" data-prepare>Prepare application</button>
 <p class="form-error" role="alert" hidden></p>
-{result_block()}
+{result_block("Copy application", "Application to copy")}
 </form>
+</div>
+<div class="apply-ko">
+{credibility_html()}
+</div>
 </div>
 </main>"""
     apply += foot()
@@ -596,7 +721,7 @@ def main():
     missing_page += f"""<main id="main" class="miss" tabindex="-1">
 {status_html()}
 <h1>This page is not on the site</h1>
-<p>The address does not match a category, a talent interest note, or a client planning note.</p>
+<p>The address does not match a category, a talent application, or a client planning note.</p>
 <p><a href="/">Return to Anistar</a></p>
 </main>"""
     missing_page += foot()

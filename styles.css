@@ -557,6 +557,42 @@ textarea[aria-invalid="true"] { border-width: 2px; }
   .foot-divs a { display: block; margin: 0 0 6px; }
 }
 
+main > .credibility {
+  padding: 40px var(--gap);
+  border-top: 1px solid var(--ink);
+}
+.apply-grid, .cred-grid { display: grid; gap: var(--gap); }
+.benefits { display: grid; gap: 0; margin-top: 12px; }
+.benefits div { border-top: 1px solid var(--ink); padding: 12px 0 16px; }
+.benefits dt { font-family: var(--display); font-size: 20px; font-weight: 500; }
+.benefits dd { margin-top: 4px; }
+.films { list-style: none; padding: 0; margin: 12px 0 0; }
+.films li { border-top: 1px solid var(--rule); padding: 12px 0; }
+.film-title { font-family: var(--display); font-size: 20px; }
+.film-sources { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 6px; }
+.film-sources a { font-size: 14px; }
+fieldset { border: 0; border-top: 1px solid var(--ink); margin: 0; padding: 8px 0 0; min-width: 0; }
+legend { font-family: var(--display); font-size: 20px; padding: 0 0 8px; }
+.apply-form, .ko, .henry { min-width: 0; }
+.henry { border-top: 1px solid var(--ink); padding-top: 16px; }
+
+@media (min-width: 800px) {
+  .apply-grid { grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); }
+  .apply-intro { grid-column: 1; grid-row: 1; }
+  .apply-ko { grid-column: 1; grid-row: 2; }
+  .apply-form { grid-column: 2; grid-row: 1 / span 2; align-self: start; }
+  .cred-grid { grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr); align-items: start; }
+  .henry { border-top: 0; padding-top: 0; }
+  .apply .cred-grid { grid-template-columns: 1fr; }
+  .apply .henry { border-top: 1px solid var(--ink); padding-top: 16px; margin-top: 8px; }
+}
+
+@media (max-width: 799px) {
+  .apply-intro { order: 1; }
+  .apply-form { order: 2; }
+  .apply-ko { order: 3; }
+}
+
 @media (min-width: 1100px) {
   .mast { flex-wrap: nowrap; }
 }
@@ -565,7 +601,9 @@ textarea[aria-invalid="true"] { border-width: 2px; }
   .mast { align-items: flex-start; }
   .mast { flex-wrap: wrap; }
   .brand,
-  .foot .brand { width: min(280px, 100%); }
+  .foot .brand { width: min(200px, 100%); }
+  .hero { padding-top: 8px; }
+  main > .status { padding-bottom: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

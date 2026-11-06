@@ -159,8 +159,8 @@ try {
     const nav = document.querySelector("#primary-nav");
     const style = getComputedStyle(nav);
     return {
-      status: document.body.innerText.includes("Anistar is in development. Talent representation and booking services are not yet available."),
-      explore: !!document.querySelector('a.btn[href="/talent/"]'),
+      status: document.body.innerText.includes("Anistar is a new agency. This website is under construction, and representation and booking are not yet available."),
+      explore: !!document.querySelector('a[href="/talent/"]'),
       interest: !!document.querySelector('a[href="/apply/"]'),
       planning: !!document.querySelector('a[href="/book/"]'),
       bookCta: document.body.innerText.includes("Book talent"),
@@ -182,11 +182,11 @@ try {
   const mobileNav = await evaluate(`getComputedStyle(document.querySelector("#primary-nav")).display`);
   if (mobileNav === "none") fail("primary navigation is hidden at 390");
   const cta = await evaluate(`(() => {
-    const link = document.querySelector('a.btn[href="/talent/"]');
+    const link = document.querySelector('a.btn[href="/apply/"]');
     const rect = link.getBoundingClientRect();
     return { top: rect.top, height: rect.height, text: link.textContent };
   })()`);
-  if (cta.text !== "Explore talent categories" || cta.height < 44 || cta.top > 844) {
+  if (cta.text !== "Talent application" || cta.height < 44 || cta.top > 844) {
     fail(`primary CTA is not visible on the first mobile screen: ${JSON.stringify(cta)}`);
   }
   await assertLogo("header logo 390", 200);
@@ -268,34 +268,48 @@ try {
   await assertNoOverflow("talent form 1440");
   const talent = await evaluate(`(() => {
     const form = document.querySelector("#apply-form");
+    const prefilled = form.querySelector("[name=division]").value;
+    form.querySelector("[data-prepare]").click();
+    const emptyError = form.querySelector(".form-error").textContent;
+    const resultHidden = form.querySelector("[data-result]").hidden;
     form.querySelector("[name=name]").value = "A Public Name";
+    form.querySelector("[name=email]").value = "artist@example.com";
     const division = form.querySelector("[name=division]");
     division.value = "Creators & Artists";
     division.dispatchEvent(new Event("change", { bubbles: true }));
     form.querySelector("[name=specialty]").value = "Manga Artists (Mangaka)";
     form.querySelector("[name=url]").value = "https://example.com/portfolio";
+    form.querySelector("[name=languages]").value = "English, Japanese";
+    form.querySelector("[name=goals]").value = "Convention panels and a category page.";
     form.querySelector("[name=adult]").checked = true;
     form.querySelector("[data-prepare]").click();
     return {
+      prefilled,
+      emptyError,
+      resultHidden,
       note: form.querySelector("[data-result-text]").value,
       message: form.querySelector("[data-result-msg]").textContent,
+      copyLabel: form.querySelector("[data-copy]").textContent,
       stored: localStorage.getItem("anistar-brief"),
     };
   })()`);
-  if (!talent.note.includes("ANISTAR TALENT INTEREST NOTE")) fail("talent note has the wrong heading");
+  if (talent.prefilled !== "Creators & Artists") fail(`division was not prefilled: ${talent.prefilled}`);
+  if (talent.resultHidden !== true || !talent.emptyError) fail(`empty application did not stay unsent: ${JSON.stringify(talent)}`);
+  if (!talent.note.includes("ANISTAR TALENT APPLICATION")) fail("talent note has the wrong heading");
   if (talent.note.includes("Guest Cosplayers") || talent.note.includes("PLANNING NOTE")) {
     fail(`talent note mixed in the client shortlist: ${talent.note}`);
   }
-  if (!talent.note.includes("https://example.com/portfolio") || !talent.note.includes("18 or older: yes")) {
+  if (!talent.note.includes("https://example.com/portfolio") || !talent.note.includes("18 or older: yes") || !talent.note.includes("artist@example.com")) {
     fail(`talent note dropped public fields: ${talent.note}`);
   }
   if (!talent.note.includes("Nothing was sent. This is not a representation agreement.")) {
     fail("talent note is missing the no-send line");
   }
-  if (talent.message !== "Nothing was sent. Anistar did not receive this note. Copy it if you want to keep it.") {
+  if (talent.message !== "Nothing was sent. Anistar did not receive this application. Copy it if you want to keep it.") {
     fail(`talent message changed: ${talent.message}`);
   }
-  if (talent.stored.includes("A Public Name") || talent.stored.includes("example.com")) {
+  if (talent.copyLabel !== "Copy application") fail(`copy control changed: ${talent.copyLabel}`);
+  if (!talent.stored || talent.stored.includes("A Public Name") || talent.stored.includes("example.com") || talent.stored.includes("artist@")) {
     fail(`form details were stored: ${talent.stored}`);
   }
   const badTalentRequests = requests.filter((request) => request.method !== "GET" || request.url.startsWith("mailto:"));
