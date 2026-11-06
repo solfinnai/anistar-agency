@@ -408,95 +408,69 @@ def result_block(copy_label="Copy this note", note_label="Note to copy"):
     )
 
 
-# Company distribution only. Ko is not credited on this site as director or producer of these films.
+# title, official href, short source label, source href
 FILMS = [
     (
         "Maquia: When the Promised Flower Blooms",
-        "ELEVEN ARTS announced the North American theatrical release for July 20, 2018.",
-        [
-            (
-                "Anime News Network, April 12, 2018",
-                "https://www.animenewsnetwork.com/press-release/2018-04-12/eleven-arts-anime-studio-to-release-maquia-when-the-promised-flower-blooms/.130262",
-            ),
-            ("ELEVEN ARTS catalog", "https://www.elevenarts.net/anime/films"),
-        ],
+        "https://www.elevenarts.net/anime/films",
+        "North American theatrical release",
+        "https://www.animenewsnetwork.com/press-release/2018-04-12/eleven-arts-anime-studio-to-release-maquia-when-the-promised-flower-blooms/.130262",
     ),
     (
         "Penguin Highway",
-        "ELEVEN ARTS brought the film to U.S. and Canadian cinemas beginning April 12, 2019.",
-        [
-            (
-                "SciFi Japan, citing the ELEVEN ARTS announcement",
-                "https://www.scifijapan.com/godzilla-toho/penguin-highway-comes-to-north-american-theaters-starting-april-12",
-            ),
-            ("ELEVEN ARTS title page", "https://www.elevenarts.net/titles/penguin-highway"),
-        ],
+        "https://www.elevenarts.net/titles/penguin-highway",
+        "North American theatrical release",
+        "https://www.scifijapan.com/godzilla-toho/penguin-highway-comes-to-north-american-theaters-starting-april-12",
     ),
     (
         "Ryoma! The Prince of Tennis",
-        "On February 19, 2022, ELEVEN ARTS announced it had acquired the North American distribution rights.",
-        [("ELEVEN ARTS news", "https://www.elevenarts.net/anime/anime-news")],
+        "https://www.elevenarts.net/anime/anime-news",
+        "North American distribution",
+        "https://www.elevenarts.net/anime/anime-news",
     ),
     (
         "Millennium Actress",
-        "ELEVEN ARTS announced a North American theatrical run and a Blu-ray, DVD, and digital release with Shout! Factory on December 10, 2019.",
-        [
-            ("ELEVEN ARTS news", "https://www.elevenarts.net/anime/anime-news"),
-            ("ELEVEN ARTS catalog", "https://www.elevenarts.net/anime/films"),
-        ],
+        "https://www.elevenarts.net/anime/films",
+        "North American release",
+        "https://www.elevenarts.net/anime/anime-news",
     ),
     (
         "A Silent Voice",
-        "The film is on the ELEVEN ARTS distribution catalog. The Outerhaven reported on September 12, 2017 that ELEVEN ARTS was bringing it to U.S. theaters that October.",
-        [
-            ("ELEVEN ARTS title page", "https://www.elevenarts.net/titles/a-silent-voice"),
-            (
-                "The Outerhaven, September 12, 2017",
-                "https://www.theouterhaven.net/2017/09/u-s-screenings-silent-voice-revealed/",
-            ),
-        ],
+        "https://www.elevenarts.net/titles/a-silent-voice",
+        "U.S. theatrical screenings",
+        "https://www.theouterhaven.net/2017/09/u-s-screenings-silent-voice-revealed/",
     ),
 ]
 
 
 def films_html():
     items = []
-    for title, note, sources in FILMS:
-        links = "".join(f'<a href="{e(href)}">{e(label)}</a>' for label, href in sources)
+    for title, href, source_label, source_href in FILMS:
         items.append(
-            f'<li><p class="film-title">{e(title)}</p><p>{e(note)}</p>'
-            f'<p class="film-sources">{links}</p></li>'
+            "<li>"
+            f'<a class="film-title" href="{e(href)}">{e(title)}</a>'
+            f'<a href="{e(source_href)}">{e(source_label)}</a>'
+            "</li>"
         )
     return f'<ul class="films">{"".join(items)}</ul>'
 
 
 def credibility_html():
-    films = films_html()
     return f"""<section class="credibility" id="credibility" aria-labelledby="credibility-title">
-<h2 id="credibility-title">Ko Mori, Henry Finn, and the plan</h2>
+<h2 id="credibility-title">From Japanese anime releases to a new home for talent</h2>
 <div class="cred-grid">
 <article class="ko" id="ko">
-<p class="side-kicker">Co-founder</p>
 <h3>Ko Mori</h3>
 <p class="role">Co-founder of Anistar. Founder and CEO of ELEVEN ARTS.</p>
-<p>Ko Mori is a co-founder of Anistar and the founder and CEO of ELEVEN ARTS in Los Angeles. ELEVEN ARTS is a separate company. It releases Japanese anime for audiences in North America. That record is why Anistar's plan is connecting talent across East and West.</p>
-<p>The intended focus is representation in North America, South America, Japan, Europe, and the Middle East. Those regions are a plan. Anistar has no offices there, holds no local licenses, and does not arrange visas or cross-border jobs.</p>
-<p>ELEVEN ARTS releases include the films below. They are distribution credits for that company. They are not Anistar clients, and this list does not call Ko the director or the producer of the films.</p>
-{films}
-<ul class="url-list">
-<li><a href="https://www.elevenarts.net/">https://www.elevenarts.net/</a></li>
-<li><a href="https://www.instagram.com/eleven_arts/">https://www.instagram.com/eleven_arts/</a></li>
-<li><a href="https://en.wikipedia.org/wiki/Eleven_Arts">https://en.wikipedia.org/wiki/Eleven_Arts</a></li>
-<li><a href="https://project-anime.org/wp-content/uploads/2020/01/2019_Project_Anime_Los_Angeles_Program_Guide.pdf">https://project-anime.org/wp-content/uploads/2020/01/2019_Project_Anime_Los_Angeles_Program_Guide.pdf</a></li>
-</ul>
-<p class="quiet">Founder and CEO is how Wikipedia's Eleven Arts entry and the 2019 Project Anime Los Angeles program describe him. The program says President and CEO. The ELEVEN ARTS about page does not name him. A link is not a partnership, and this site does not recruit through the ELEVEN ARTS Instagram account.</p>
+<p>Ko Mori co-founded Anistar with Henry Finn. He leads ELEVEN ARTS, a Los Angeles distributor bringing Japanese anime to North American audiences. ELEVEN ARTS is a separate company.</p>
+<p class="ko-links"><a href="https://www.elevenarts.net/">ELEVEN ARTS</a><a href="https://www.instagram.com/eleven_arts/">ELEVEN ARTS on Instagram</a></p>
+<h3 class="film-heading">Selected ELEVEN ARTS releases</h3>
+{films_html()}
 </article>
 <article class="henry" id="henry">
-<p class="side-kicker">Co-founder</p>
-<h3>Henry Finn</h3>
+<h3><a href="https://henryfinn.com">Henry Finn</a></h3>
 <p class="role">Co-founder of Anistar.</p>
 <p>Henry Finn is a co-founder of Anistar. He started it with Ko Mori.</p>
-<ul class="url-list"><li><a href="https://henryfinn.com">https://henryfinn.com</a></li></ul>
 </article>
 </div>
 </section>"""
@@ -591,7 +565,7 @@ def main():
 <p class="page-kana" lang="ja">{e(meta["jp"])}</p>
 <p class="dek">{e(meta["lede"])}</p>
 <div class="div-links"><a class="btn" href="/apply/?division={quoted}">Talent application</a><a class="textlink" href="/book/?division={quoted}">Client planning note</a></div>
-<p class="quiet">The application is a copy you prepare. Nothing is sent. This division lists categories, not people.</p>
+<p class="quiet">Open a talent application with this division filled in.</p>
 </div>
 <p class="div-note">Add a category to the planning note if a future project might need it. The list stays in this browser.</p>
 </div>
@@ -664,22 +638,20 @@ def main():
 {status_html()}
 <div class="apply-grid">
 <div class="apply-intro">
-<p class="side-kicker">New agency. Website under construction.</p>
-<h1>Accepting talent applications for our founding roster.</h1>
-<p class="dek">If you work in anime, cosplay, manga, comics, or games, you can put your name forward. This is an expression of interest. It is not a representation agreement, and it does not promise a job.</p>
-<p>No size of following is required. A team or a studio can apply under one name. Voice, music, esports, and the rest of the category map are open too.</p>
-<h2>Proposed support</h2>
-<p>These are plans for after licensing and contracts. They are not services Anistar can deliver today.</p>
+<h1>Join Anistar's founding talent roster</h1>
+<p class="dek">Prepare your expression of interest while our new agency takes shape.</p>
+<p>Adults in anime, cosplay, manga, comics, and games are invited, including voice, music, esports, and the wider category map. A team or a studio can apply under one name. No following size is required.</p>
+<h2>Our planned support, subject to licensing and representation agreements</h2>
 <dl class="benefits">
-<div><dt>A place in your category</dt><dd>Anistar would present your portfolio in the category that fits the work, so a reader sees a cosplayer, a mangaka, a voice actor, or a team.</dd></div>
-<div><dt>Introductions</dt><dd>Introductions to other creators in related categories, when both people want the conversation.</dd></div>
-<div><dt>Interviews and short features</dt><dd>Interviews and short features about the work, as content Anistar plans to make. A feature is not guaranteed.</dd></div>
-<div><dt>Cross-market work, after licensing</dt><dd>Brand and convention collaborations, and representation, for creators who want work to travel among North America, South America, Japan, Europe, and the Middle East. An application does not sign you, book you, set a fee, get you a visa, or open a door to a named studio.</dd></div>
+<div><dt>Category positioning</dt><dd>A portfolio presented in the category that fits the work, from cosplay and manga to voice and games.</dd></div>
+<div><dt>Creator collaborations</dt><dd>Introductions among creators who want to work together.</dd></div>
+<div><dt>Interviews and content</dt><dd>Conversations and short features about the work you are making.</dd></div>
+<div><dt>Cross-market partnerships</dt><dd>Future brand, convention, and representation opportunities across North America, South America, Japan, Europe, and the Middle East.</dd></div>
 </dl>
 </div>
 <div class="apply-form">
 <h2>Prepare your application</h2>
-<p class="quiet">Prepare it, then copy it. Nothing is sent. This page does not store it. Anistar has no monitored inbox and no privacy notice yet, so nothing here is reviewed and nothing is answered. A live application needs both of those before it can be delivered.</p>
+<p class="quiet">This preview lets you prepare and copy your application. Online submission is not available yet. Nothing is sent.</p>
 <p data-from-division hidden></p>
 <form class="form" id="apply-form" method="post" action="/apply/" novalidate onsubmit="event.preventDefault()" autocomplete="off" data-nosend="true">
 <fieldset>

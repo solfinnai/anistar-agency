@@ -212,7 +212,7 @@ function invalid(field) {
 const line = (label, value) => `${label}: ${value && String(value).trim() ? String(value).trim() : "-"}`;
 
 const PLAN_MSG = "Nothing was sent. Anistar did not receive this note. Copy it if you want to keep it.";
-const APPLY_MSG = "Nothing was sent. Anistar did not receive this application. Copy it if you want to keep it.";
+const APPLY_MSG = "This preview lets you prepare and copy your application. Online submission is not available yet. Nothing is sent.";
 
 function handle(form, build, doneMessage) {
   const prepare = () => {

@@ -104,7 +104,18 @@ class SiteTests(unittest.TestCase):
         self.assertIn("https://www.elevenarts.net/", home)
         self.assertIn("https://www.instagram.com/eleven_arts/", home)
         self.assertIn("Founder and CEO of ELEVEN ARTS.", home)
-        self.assertIn("does not recruit through the ELEVEN ARTS Instagram account.", home)
+        self.assertIn("ELEVEN ARTS is a separate company.", home)
+        self.assertIn("https://www.instagram.com/eleven_arts/", home)
+        self.assertNotIn("https://www.elevenarts.net/</a>", home)
+        for internal in (
+            "no offices there",
+            "does not call Ko",
+            "Wikipedia",
+            "privacy notice",
+            "named studio",
+            "no monitored inbox",
+        ):
+            self.assertNotIn(internal, home, internal)
         self.assertFalse((ROOT / "privacy" / "index.html").exists())
         self.assertFalse((ROOT / "terms" / "index.html").exists())
 
@@ -133,7 +144,13 @@ class SiteTests(unittest.TestCase):
         self.assertIn(">Prepare application<", apply)
         self.assertIn(">Copy application<", apply)
         self.assertIn(">Prepare a copy<", plan)
-        self.assertIn("Accepting talent applications for our founding roster.", apply)
+        self.assertIn("Join Anistar's founding talent roster", apply)
+        self.assertIn(
+            "This preview lets you prepare and copy your application. Online submission is not available yet. Nothing is sent.",
+            apply,
+        )
+        self.assertIn("Selected ELEVEN ARTS releases", apply)
+        self.assertNotIn("Wikipedia", apply)
         self.assertIn("Maquia: When the Promised Flower Blooms", apply)
         script = (ROOT / "app.js").read_text()
         for phrase in ("fetch(", "XMLHttpRequest", "sendBeacon", "mailto:", "gtag", "supabase", "plausible"):

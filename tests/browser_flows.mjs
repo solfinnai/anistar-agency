@@ -305,7 +305,7 @@ try {
   if (!talent.note.includes("Nothing was sent. This is not a representation agreement.")) {
     fail("talent note is missing the no-send line");
   }
-  if (talent.message !== "Nothing was sent. Anistar did not receive this application. Copy it if you want to keep it.") {
+  if (talent.message !== "This preview lets you prepare and copy your application. Online submission is not available yet. Nothing is sent.") {
     fail(`talent message changed: ${talent.message}`);
   }
   if (talent.copyLabel !== "Copy application") fail(`copy control changed: ${talent.copyLabel}`);
