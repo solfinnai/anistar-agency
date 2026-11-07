@@ -130,31 +130,54 @@ async function useJpegPhotographs() {
 }
 
 async function assertPhotoProportions(label, format) {
-  const photos = await evaluate(`(() => Promise.all([...document.querySelectorAll(".hero-photo img, .scene img")].map((img) => img.decode().then(() => {
-    const rect = img.getBoundingClientRect();
-    return {
-      src: img.currentSrc || img.src,
-      w: rect.width,
-      h: rect.height,
-      nw: img.naturalWidth,
-      nh: img.naturalHeight,
-      attrW: Number(img.getAttribute("width")),
-      attrH: Number(img.getAttribute("height")),
-      viewport: window.innerHeight,
+  const photos = await evaluate(`(() => {
+    const shots = [...document.querySelectorAll(".shot")];
+    const read = async (shot) => {
+      shot.scrollIntoView({ block: "center" });
+      const img = shot.querySelector("img");
+      await img.decode();
+      const rect = img.getBoundingClientRect();
+      const frame = shot.getBoundingClientRect();
+      const style = getComputedStyle(img);
+      return {
+        src: img.currentSrc || img.src,
+        w: rect.width,
+        h: rect.height,
+        fw: frame.width,
+        fh: frame.height,
+        nw: img.naturalWidth,
+        nh: img.naturalHeight,
+        heightAttr: img.getAttribute("height"),
+        fit: style.objectFit,
+        cssW: style.width,
+        cssH: style.height,
+        viewport: window.innerHeight,
+      };
     };
-  }))))()`);
-  if (!photos.length) fail(`${label} ${format} found no photographs`);
+    return shots.reduce(async (chain, shot) => {
+      const rows = await chain;
+      rows.push(await read(shot));
+      return rows;
+    }, Promise.resolve([]));
+  })()`);
+  if (photos.length !== 3) fail(`${label} ${format} expected hero, drawing, and esports photos: ${photos.length}`);
+  for (const name of ["violet-evergarden", "drawing-tablet", "evo-players"]) {
+    if (!photos.some((photo) => photo.src.includes(name))) fail(`${label} ${format} missed ${name}`);
+  }
   for (const photo of photos) {
     if (!photo.nw || !photo.nh || photo.w < 40 || photo.h < 40) {
       fail(`${label} ${format} photo did not render: ${JSON.stringify(photo)}`);
     }
+    if (photo.heightAttr) fail(`${label} ${format} still has a height attribute: ${JSON.stringify(photo)}`);
+    if (photo.fit !== "contain") fail(`${label} ${format} object-fit is ${photo.fit}: ${JSON.stringify(photo)}`);
     const shown = photo.w / photo.h;
+    const frame = photo.fw / photo.fh;
     const natural = photo.nw / photo.nh;
     if (Math.abs(shown - natural) / natural > 0.03) {
-      fail(`${label} ${format} photo is stretched: ${JSON.stringify(photo)}`);
+      fail(`${label} ${format} image box is stretched: ${JSON.stringify(photo)}`);
     }
-    if (photo.w < photo.attrW * 0.75 && photo.h > photo.attrH * 0.9) {
-      fail(`${label} ${format} kept the attribute height while shrinking width: ${JSON.stringify(photo)}`);
+    if (Math.abs(frame - natural) / natural > 0.03) {
+      fail(`${label} ${format} frame is stretched: ${JSON.stringify(photo)}`);
     }
     if (label.startsWith("home 3") && photo.h > photo.viewport * 0.85) {
       fail(`${label} ${format} photo is a full-height strip: ${JSON.stringify(photo)}`);

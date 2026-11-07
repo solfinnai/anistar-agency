@@ -209,6 +209,10 @@ class SiteTests(unittest.TestCase):
         credits = (ROOT / "credits" / "index.html").read_text()
         css = (ROOT / "styles.css").read_text()
         self.assertIn("img {\n  max-width: 100%;\n  height: auto;\n}", css)
+        self.assertIn("object-fit: contain;", css)
+        self.assertIn("padding-bottom: calc(var(--h) / var(--w) * 100%);", css)
+        self.assertIn('href="/styles.css?v=', home)
+        self.assertNotIn('stale-while-revalidate', (ROOT / "vercel.json").read_text())
         pairs = (
             ("/img/talent/violet-evergarden.jpg", "/img/talent/violet-evergarden.webp", 1050, 1400),
             ("/img/talent/drawing-tablet.jpg", "/img/talent/drawing-tablet.webp", 1400, 788),
@@ -217,8 +221,8 @@ class SiteTests(unittest.TestCase):
         for jpg, webp, width, height in pairs:
             self.assertIn(jpg, home)
             self.assertIn(webp, home)
-            self.assertIn(f'width="{width}" height="{height}"', home)
-            self.assertIn(f"aspect-ratio:{width}/{height}", home)
+            self.assertIn(f'style="--w:{width};--h:{height}"', home)
+            self.assertNotIn(f'width="{width}" height="{height}"', home)
             with Image.open(ROOT / jpg.lstrip("/")) as jpeg, Image.open(ROOT / webp.lstrip("/")) as web:
                 self.assertEqual(jpeg.size, (width, height))
                 self.assertEqual(web.size, (width, height))

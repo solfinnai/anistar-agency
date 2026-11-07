@@ -1,4 +1,4 @@
-import csv, html, json, os, re, urllib.parse
+import csv, hashlib, html, json, os, re, urllib.parse
 from pathlib import Path
 from taxonomy import T
 from site_config import BASE, FOUNDERS, LICENSE_NUMBER, LICENSE_STATUS, STATUS
@@ -285,7 +285,7 @@ def head(title, desc, path, current="", extra_ld=(), body_class=""):
 <meta name="twitter:image" content="{BASE}/og.png">
 <link rel="icon" href="/img/logo/anistar-symbol-192.png" type="image/png">
 {font_links()}
-<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="{versioned("styles.css")}">
 {lds}
 </head>
 <body class="{body_class}" data-license-status="{e(LICENSE_STATUS)}">
@@ -348,11 +348,21 @@ def founders_html():
     return "".join(bits)
 
 
+def versioned(path):
+    digest = hashlib.sha256(Path(path).read_bytes()).hexdigest()[:12]
+    return f"/{path}?v={digest}"
+
+
 def illustration_figure(item, cls):
+    # The frame, not the img width/height attributes, sets the box. WebKit keeps
+    # those attributes as the used height after the width shrinks, which stretches
+    # the bitmap. object-fit contain then paints the file uniformly inside the frame.
     return (
         f'<figure class="{cls}">'
-        f'<picture><source srcset="/img/{item["webp"]}" type="image/webp" width="{item["width"]}" height="{item["height"]}">'
-        f'<img src="/img/{item["file"]}" alt="{e(item["alt"])}" width="{item["width"]}" height="{item["height"]}" style="aspect-ratio:{item["width"]}/{item["height"]}"></picture>'
+        f'<div class="shot" style="--w:{item["width"]};--h:{item["height"]}">'
+        f'<picture><source srcset="/img/{item["webp"]}" type="image/webp">'
+        f'<img src="/img/{item["file"]}" alt="{e(item["alt"])}"></picture>'
+        f"</div>"
         f'<figcaption>{e(item["caption"])} <a href="/credits/">Image credits</a></figcaption>'
         f"</figure>"
     )
