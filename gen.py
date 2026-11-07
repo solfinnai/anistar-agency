@@ -133,6 +133,61 @@ PHOTO_CREDITS = [
     ("talent-emerging-tech.jpg", "Emerging Tech", "Shahrooz Shekaraubi", "https://unsplash.com/@shahroozshekaraubi", "https://unsplash.com/photos/a-pair-of-vr-headset-sitting-on-top-of-a-table-BCLUHs9kDC0"),
 ]
 
+# Photographs shown on the public pages. Contextual illustrations only.
+ILLUSTRATIONS = [
+    {
+        "slot": "hero",
+        "file": "talent/wondercon-xmen.jpg",
+        "webp": "talent/wondercon-xmen.webp",
+        "width": 1600,
+        "height": 1067,
+        "alt": "Five adults in 1990s X-Men costumes posing together in a convention hall at WonderCon 2019.",
+        "caption": "Convention cosplay at WonderCon 2019. Not Anistar talent.",
+        "where": "Homepage hero",
+        "creator": "W10002",
+        "creator_url": "https://www.flickr.com/photos/28277470@N05/",
+        "photo_page": "https://www.flickr.com/photos/28277470@N05/47451008372",
+        "source_page": "https://commons.wikimedia.org/wiki/File:WonderCon_2019_-_90s_X-Men_(1)_(47451008372).jpg",
+        "license": "CC BY-SA 2.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+        "changes": "Resized and compressed for the page. This copy is offered under CC BY-SA 2.0.",
+    },
+    {
+        "slot": "scene",
+        "file": "talent/drawing-tablet.jpg",
+        "webp": "talent/drawing-tablet.webp",
+        "width": 1400,
+        "height": 788,
+        "alt": "A hand penciling comic panels on a display tablet.",
+        "caption": "An illustrator penciling a comic page. Not Anistar talent.",
+        "where": "Homepage, creators",
+        "creator": "David Revoy",
+        "creator_url": "https://www.davidrevoy.com/article334/making-of-episode-23",
+        "photo_page": "https://www.davidrevoy.com/article334/making-of-episode-23",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Penciling_on_Wacom_Cintiq_13HD_by_David_Revoy.jpg",
+        "license": "CC BY 4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "changes": "Resized and compressed for the page.",
+    },
+    {
+        "slot": "scene",
+        "file": "talent/evo-players.jpg",
+        "webp": "talent/evo-players.webp",
+        "width": 1800,
+        "height": 591,
+        "alt": "Competitive Super Smash Bros. Melee players standing together at Evo 2014.",
+        "caption": "Players at Evo 2014. Not Anistar talent.",
+        "where": "Homepage, esports",
+        "creator": "vsmak350",
+        "creator_url": "https://www.flickr.com/photos/vsmak/",
+        "photo_page": "https://www.flickr.com/photos/vsmak/14661438753/",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Melee_It_On_Me_-_Super_Smash_Bros._Melee_players_at_Evo_2014.jpg",
+        "license": "CC BY-SA 2.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+        "changes": "Resized and compressed for the page. This copy is offered under CC BY-SA 2.0.",
+    },
+]
+
 ORG = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -291,6 +346,32 @@ def founders_html():
             f'<ul class="url-list">{links}</ul></article>'
         )
     return "".join(bits)
+
+
+def illustration_figure(item, cls):
+    return (
+        f'<figure class="{cls}">'
+        f'<picture><source srcset="/img/{item["webp"]}" type="image/webp">'
+        f'<img src="/img/{item["file"]}" alt="{e(item["alt"])}" width="{item["width"]}" height="{item["height"]}"></picture>'
+        f'<figcaption>{e(item["caption"])} <a href="/credits/">Image credits</a></figcaption>'
+        f"</figure>"
+    )
+
+
+def hero_photo():
+    item = next(photo for photo in ILLUSTRATIONS if photo["slot"] == "hero")
+    return illustration_figure(item, "hero-photo")
+
+
+def scene_photos():
+    figures = "".join(
+        illustration_figure(photo, "scene") for photo in ILLUSTRATIONS if photo["slot"] == "scene"
+    )
+    return (
+        '<section class="scenes" aria-label="Category illustrations">'
+        '<p>Category illustrations. Not a roster, and not an endorsement.</p>'
+        f"{figures}</section>"
+    )
 
 
 def hero_index():
@@ -495,7 +576,9 @@ def main():
         ),
         "STATUS": STATUS,
         "FOOT": foot(),
+        "HERO_PHOTO": hero_photo(),
         "HERO_INDEX": hero_index(),
+        "SCENE_PHOTOS": scene_photos(),
         "FOUNDERS": founders_html(),
         "CREDIBILITY": credibility_html(),
         "INDEX": index_blocks(),
@@ -702,10 +785,23 @@ def main():
     credits_ld = crumbs([("Anistar Agency", "/"), ("Image file credits", "/credits/")])
     credits = head(
         "Image file credits | Anistar Agency",
-        "Unsplash files stored with the Anistar project. They are not pictures of Anistar talent or clients.",
+        "Photographs shown on the Anistar site, with creator, license, and source page. They are category illustrations, not Anistar talent.",
         "/credits/",
         extra_ld=(credits_ld,),
     )
+    shown = []
+    for item in ILLUSTRATIONS:
+        shown.append(
+            "<li>"
+            f'<p class="credit-where">{e(item["where"])}</p>'
+            f'<p class="credit-file">/img/{e(item["file"])}</p>'
+            f'<p>{e(item["creator"])}. <a href="{e(item["creator_url"])}">{e(item["creator_url"])}</a></p>'
+            f'<p><a href="{e(item["source_page"])}">{e(item["source_page"])}</a></p>'
+            f'<p><a href="{e(item["photo_page"])}">{e(item["photo_page"])}</a></p>'
+            f'<p><a href="{e(item["license_url"])}">{e(item["license"])}</a></p>'
+            f'<p>{e(item["changes"])}</p>'
+            "</li>"
+        )
     rows = []
     for file, where, name, profile, photo in PHOTO_CREDITS:
         rows.append(
@@ -720,7 +816,14 @@ def main():
     credits += f"""<main id="main" class="page" tabindex="-1">
 {status_html()}
 <h1>Image file credits</h1>
-<p class="dek">These files are stored with the project under /img. They come from Unsplash, under the <a href="https://unsplash.com/license">Unsplash License</a>. They are photographs of places and tools. They are not pictures of Anistar talent, clients, or events, and the public pages do not use them as a roster.</p>
+<p class="dek">Three photographs are shown on the homepage as category illustrations. They are not pictures of Anistar talent or clients. Nobody pictured has a representation agreement with Anistar, and the photographs are not an endorsement by the people, the events, or the characters in the costumes.</p>
+<p>No model release is held by Anistar. Wikimedia Commons did not flag a personality-rights restriction on these three files. Costumes and the game in the photographs belong to their own rightsholders. The files are used as photographs of a convention and a tournament, not as character art or game artwork.</p>
+<h2>Shown on the site</h2>
+<ol class="credits">
+{"".join(shown)}
+</ol>
+<h2>Stored, not shown</h2>
+<p class="dek">These other files are stored with the project under /img. They come from Unsplash, under the <a href="https://unsplash.com/license">Unsplash License</a>. They are photographs of places and tools. The public pages do not use them.</p>
 <ol class="credits">
 {"".join(rows)}
 </ol>
@@ -731,9 +834,19 @@ def main():
     lines = [
         "# Photography credits",
         "",
-        "Image files under img/ are from Unsplash, under the Unsplash License: https://unsplash.com/license",
+        "Shown photographs are category illustrations. They are not Anistar talent, clients, or an endorsement.",
+        "No model release is held by Anistar.",
         "",
-        "Public pages do not display them. They are not pictures of Anistar talent, clients, or events.",
+        "| File | Where | Creator | License | Source page | Photo page |",
+        "|---|---|---|---|---|---|",
+    ]
+    for item in ILLUSTRATIONS:
+        lines.append(
+            f'| {item["file"]} | {item["where"]} | {item["creator"]} | {item["license"]} {item["license_url"]} | {item["source_page"]} | {item["photo_page"]} |'
+        )
+    lines += [
+        "",
+        "Other files under img/ are from Unsplash and are not shown on the public pages: https://unsplash.com/license",
         "",
         "| File | Well | Photographer | Profile | Unsplash photo |",
         "|---|---|---|---|---|",

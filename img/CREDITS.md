@@ -1,8 +1,15 @@
 # Photography credits
 
-Image files under img/ are from Unsplash, under the Unsplash License: https://unsplash.com/license
+Shown photographs are category illustrations. They are not Anistar talent, clients, or an endorsement.
+No model release is held by Anistar.
 
-Public pages do not display them. They are not pictures of Anistar talent, clients, or events.
+| File | Where | Creator | License | Source page | Photo page |
+|---|---|---|---|---|---|
+| talent/wondercon-xmen.jpg | Homepage hero | W10002 | CC BY-SA 2.0 https://creativecommons.org/licenses/by-sa/2.0/ | https://commons.wikimedia.org/wiki/File:WonderCon_2019_-_90s_X-Men_(1)_(47451008372).jpg | https://www.flickr.com/photos/28277470@N05/47451008372 |
+| talent/drawing-tablet.jpg | Homepage, creators | David Revoy | CC BY 4.0 https://creativecommons.org/licenses/by/4.0/ | https://commons.wikimedia.org/wiki/File:Penciling_on_Wacom_Cintiq_13HD_by_David_Revoy.jpg | https://www.davidrevoy.com/article334/making-of-episode-23 |
+| talent/evo-players.jpg | Homepage, esports | vsmak350 | CC BY-SA 2.0 https://creativecommons.org/licenses/by-sa/2.0/ | https://commons.wikimedia.org/wiki/File:Melee_It_On_Me_-_Super_Smash_Bros._Melee_players_at_Evo_2014.jpg | https://www.flickr.com/photos/vsmak/14661438753/ |
+
+Other files under img/ are from Unsplash and are not shown on the public pages: https://unsplash.com/license
 
 | File | Well | Photographer | Profile | Unsplash photo |
 |---|---|---|---|---|

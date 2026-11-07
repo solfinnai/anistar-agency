@@ -198,8 +198,33 @@ class SiteTests(unittest.TestCase):
         home = (ROOT / "index.html").read_text()
         self.assertIn('alt="Anistar"', home)
         self.assertIn("/img/logo/anistar-lockup.png", home)
-        self.assertIn("/img/logo/anistar-symbol.png", home)
+        self.assertNotIn("/img/logo/anistar-symbol.png", home)
+        self.assertNotIn('class="hero-mark"', home)
         self.assertNotIn("favicon.svg", home)
+
+    def test_public_illustrations_are_credited(self):
+        home = (ROOT / "index.html").read_text()
+        credits = (ROOT / "credits" / "index.html").read_text()
+        for path in (
+            "/img/talent/wondercon-xmen.jpg",
+            "/img/talent/wondercon-xmen.webp",
+            "/img/talent/drawing-tablet.jpg",
+            "/img/talent/evo-players.jpg",
+        ):
+            self.assertIn(path, home)
+            self.assertTrue((ROOT / path.lstrip("/")).is_file())
+        self.assertIn("Not Anistar talent.", home)
+        self.assertIn("Convention cosplay at WonderCon 2019.", home)
+        for url in (
+            "https://commons.wikimedia.org/wiki/File:WonderCon_2019_-_90s_X-Men_(1)_(47451008372).jpg",
+            "https://commons.wikimedia.org/wiki/File:Penciling_on_Wacom_Cintiq_13HD_by_David_Revoy.jpg",
+            "https://commons.wikimedia.org/wiki/File:Melee_It_On_Me_-_Super_Smash_Bros._Melee_players_at_Evo_2014.jpg",
+            "https://creativecommons.org/licenses/by-sa/2.0/",
+            "https://creativecommons.org/licenses/by/4.0/",
+        ):
+            self.assertIn(url, credits)
+        self.assertIn("No model release is held by Anistar.", credits)
+        self.assertIn("not an endorsement", credits)
 
     def test_browser_shortlist_and_forms(self):
         chrome = "/usr/bin/google-chrome-stable"

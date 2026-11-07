@@ -207,15 +207,21 @@ main > .status { padding: var(--gap) var(--gap) 0; }
 
 .plan-link { font-size: 16px; }
 
-.hero-mark {
-  display: block;
-  width: min(100%, 380px);
-  height: auto;
-  max-width: 100%;
-  margin: 0 0 12px;
-  object-fit: contain;
-  background: transparent;
+.hero-photo, .scene { margin: 0; }
+.hero-photo img, .scene img { display: block; width: 100%; height: auto; }
+.hero-photo figcaption, .scene figcaption, .scenes > p {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--ink-70);
 }
+.scenes, .division-index {
+  display: grid;
+  gap: var(--gap);
+  padding: 0 var(--gap) 40px;
+}
+.scenes > p { margin-top: 0; }
+.division-index { gap: 8px; }
 
 .side-kicker, .req, .quiet, .roles, .colophon, .credit-file {
   font-size: 14px;
@@ -523,6 +529,8 @@ textarea[aria-invalid="true"] { border-width: 2px; }
 
   .hero-copy { grid-column: span 7; }
   .hero-side { grid-column: span 5; }
+  .division-index .side-index { columns: 2; }
+  .division-index .side-index a { break-inside: avoid; }
   .agency-copy { grid-column: 1 / span 7; }
   .planned { grid-column: 9 / span 4; }
   .person:first-child { grid-column: 1 / span 6; }
