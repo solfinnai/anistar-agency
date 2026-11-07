@@ -137,20 +137,20 @@ PHOTO_CREDITS = [
 ILLUSTRATIONS = [
     {
         "slot": "hero",
-        "file": "talent/wondercon-xmen.jpg",
-        "webp": "talent/wondercon-xmen.webp",
-        "width": 1600,
-        "height": 1067,
-        "alt": "Five adults in 1990s X-Men costumes posing together in a convention hall at WonderCon 2019.",
-        "caption": "Convention cosplay at WonderCon 2019. Not Anistar talent.",
+        "file": "talent/violet-evergarden.jpg",
+        "webp": "talent/violet-evergarden.webp",
+        "width": 1050,
+        "height": 1400,
+        "alt": "An adult cosplayer dressed as Violet Evergarden at the 14th Zhuhai Animation Show.",
+        "caption": "Cosplay of Violet Evergarden, from the anime Violet Evergarden, at the 14th Zhuhai Animation Show. Not Anistar talent.",
         "where": "Homepage hero",
-        "creator": "W10002",
-        "creator_url": "https://www.flickr.com/photos/28277470@N05/",
-        "photo_page": "https://www.flickr.com/photos/28277470@N05/47451008372",
-        "source_page": "https://commons.wikimedia.org/wiki/File:WonderCon_2019_-_90s_X-Men_(1)_(47451008372).jpg",
-        "license": "CC BY-SA 2.0",
-        "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
-        "changes": "Resized and compressed for the page. This copy is offered under CC BY-SA 2.0.",
+        "creator": "Yumeto",
+        "creator_url": "https://commons.wikimedia.org/wiki/File:20251004_Cosplay_of_Violet_Evergarden_at_the_14th_Zhuhai_Animation_Show.jpg",
+        "photo_page": "https://commons.wikimedia.org/wiki/File:20251004_Cosplay_of_Violet_Evergarden_at_the_14th_Zhuhai_Animation_Show.jpg",
+        "source_page": "https://commons.wikimedia.org/wiki/File:20251004_Cosplay_of_Violet_Evergarden_at_the_14th_Zhuhai_Animation_Show.jpg",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "changes": "Resized and compressed for the page. This copy is offered under CC BY-SA 4.0.",
     },
     {
         "slot": "scene",
@@ -351,8 +351,8 @@ def founders_html():
 def illustration_figure(item, cls):
     return (
         f'<figure class="{cls}">'
-        f'<picture><source srcset="/img/{item["webp"]}" type="image/webp">'
-        f'<img src="/img/{item["file"]}" alt="{e(item["alt"])}" width="{item["width"]}" height="{item["height"]}"></picture>'
+        f'<picture><source srcset="/img/{item["webp"]}" type="image/webp" width="{item["width"]}" height="{item["height"]}">'
+        f'<img src="/img/{item["file"]}" alt="{e(item["alt"])}" width="{item["width"]}" height="{item["height"]}" style="aspect-ratio:{item["width"]}/{item["height"]}"></picture>'
         f'<figcaption>{e(item["caption"])} <a href="/credits/">Image credits</a></figcaption>'
         f"</figure>"
     )

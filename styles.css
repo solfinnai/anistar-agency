@@ -29,7 +29,10 @@ body {
   overflow-x: clip;
 }
 
-img { max-width: 100%; }
+img {
+  max-width: 100%;
+  height: auto;
+}
 
 h1, h2, h3, p, ul, ol, dl, figure, dd, dt { margin: 0; }
 
@@ -207,8 +210,28 @@ main > .status { padding: var(--gap) var(--gap) 0; }
 
 .plan-link { font-size: 16px; }
 
-.hero-photo, .scene { margin: 0; }
-.hero-photo img, .scene img { display: block; width: 100%; height: auto; }
+.hero-photo, .scene {
+  margin: 0;
+  align-self: start;
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+}
+.hero-photo picture, .scene picture {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+.hero-photo img, .scene img {
+  display: block;
+  box-sizing: content-box;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 68vh;
+  min-height: 0;
+}
 .hero-photo figcaption, .scene figcaption, .scenes > p {
   margin-top: 8px;
   font-size: 14px;

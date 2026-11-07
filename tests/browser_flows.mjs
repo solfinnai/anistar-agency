@@ -1,5 +1,8 @@
 import { spawn } from "node:child_process";
 import { once } from "node:events";
+import { rmSync } from "node:fs";
+
+rmSync("/tmp/anistar-cdp-a9b9", { recursive: true, force: true });
 
 const chromeBin = process.env.CHROME || "/usr/bin/google-chrome-stable";
 const port = 8877;
@@ -18,6 +21,7 @@ const chrome = spawn(
     "--no-sandbox",
     `--remote-debugging-port=${debugPort}`,
     "--user-data-dir=/tmp/anistar-cdp-a9b9",
+    "--disk-cache-size=1",
     "--allow-insecure-localhost",
     "about:blank",
   ],
@@ -116,6 +120,50 @@ async function assertLogo(label, minWidth) {
   if (Math.abs(shown - intrinsic) > 0.03) fail(`${label} is distorted: ${JSON.stringify(logo)}`);
 }
 
+async function useJpegPhotographs() {
+  await evaluate(`(() => {
+    document.querySelectorAll(".hero-photo source, .scene source").forEach((node) => node.remove());
+    document.querySelectorAll(".hero-photo img, .scene img").forEach((img) => {
+      img.src = img.getAttribute("src");
+    });
+  })()`);
+}
+
+async function assertPhotoProportions(label, format) {
+  const photos = await evaluate(`(() => Promise.all([...document.querySelectorAll(".hero-photo img, .scene img")].map((img) => img.decode().then(() => {
+    const rect = img.getBoundingClientRect();
+    return {
+      src: img.currentSrc || img.src,
+      w: rect.width,
+      h: rect.height,
+      nw: img.naturalWidth,
+      nh: img.naturalHeight,
+      attrW: Number(img.getAttribute("width")),
+      attrH: Number(img.getAttribute("height")),
+      viewport: window.innerHeight,
+    };
+  }))))()`);
+  if (!photos.length) fail(`${label} ${format} found no photographs`);
+  for (const photo of photos) {
+    if (!photo.nw || !photo.nh || photo.w < 40 || photo.h < 40) {
+      fail(`${label} ${format} photo did not render: ${JSON.stringify(photo)}`);
+    }
+    const shown = photo.w / photo.h;
+    const natural = photo.nw / photo.nh;
+    if (Math.abs(shown - natural) / natural > 0.03) {
+      fail(`${label} ${format} photo is stretched: ${JSON.stringify(photo)}`);
+    }
+    if (photo.w < photo.attrW * 0.75 && photo.h > photo.attrH * 0.9) {
+      fail(`${label} ${format} kept the attribute height while shrinking width: ${JSON.stringify(photo)}`);
+    }
+    if (label.startsWith("home 3") && photo.h > photo.viewport * 0.85) {
+      fail(`${label} ${format} photo is a full-height strip: ${JSON.stringify(photo)}`);
+    }
+    const expected = format === "jpeg" ? ".jpg" : ".webp";
+    if (!photo.src.includes(expected)) fail(`${label} ${format} loaded the other file: ${photo.src}`);
+  }
+}
+
 async function assertNoOverflow(label) {
   const widths = await evaluate("[document.documentElement.scrollWidth, document.documentElement.clientWidth]");
   if (widths[0] > widths[1] + 1) fail(`${label} overflows: ${widths.join(" > ")}`);
@@ -141,6 +189,7 @@ async function connect() {
   await send("Page.enable");
   await send("Runtime.enable");
   await send("Network.enable");
+  await send("Network.setCacheDisabled", { cacheDisabled: true });
 }
 
 const requests = [];
@@ -176,6 +225,15 @@ try {
   if (home.license !== "forming" || home.email) fail("license or email dataset is wrong");
   await assertLogo("header logo 1440", 200);
   await assertNoOverflow("home 1440");
+  await assertPhotoProportions("home 1440", "webp");
+
+  for (const [width, height] of [[375, 812], [390, 844], [430, 932], [844, 390]]) {
+    await setViewport(width, height);
+    await openPage("/");
+    await assertPhotoProportions(`home ${width}`, "webp");
+    await useJpegPhotographs();
+    await assertPhotoProportions(`home ${width}`, "jpeg");
+  }
 
   await setViewport(390, 844);
   await openPage("/");

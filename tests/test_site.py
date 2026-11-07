@@ -203,26 +203,40 @@ class SiteTests(unittest.TestCase):
         self.assertNotIn("favicon.svg", home)
 
     def test_public_illustrations_are_credited(self):
+        from PIL import Image
+
         home = (ROOT / "index.html").read_text()
         credits = (ROOT / "credits" / "index.html").read_text()
-        for path in (
-            "/img/talent/wondercon-xmen.jpg",
-            "/img/talent/wondercon-xmen.webp",
-            "/img/talent/drawing-tablet.jpg",
-            "/img/talent/evo-players.jpg",
-        ):
-            self.assertIn(path, home)
-            self.assertTrue((ROOT / path.lstrip("/")).is_file())
+        css = (ROOT / "styles.css").read_text()
+        self.assertIn("img {\n  max-width: 100%;\n  height: auto;\n}", css)
+        pairs = (
+            ("/img/talent/violet-evergarden.jpg", "/img/talent/violet-evergarden.webp", 1050, 1400),
+            ("/img/talent/drawing-tablet.jpg", "/img/talent/drawing-tablet.webp", 1400, 788),
+            ("/img/talent/evo-players.jpg", "/img/talent/evo-players.webp", 1800, 591),
+        )
+        for jpg, webp, width, height in pairs:
+            self.assertIn(jpg, home)
+            self.assertIn(webp, home)
+            self.assertIn(f'width="{width}" height="{height}"', home)
+            self.assertIn(f"aspect-ratio:{width}/{height}", home)
+            with Image.open(ROOT / jpg.lstrip("/")) as jpeg, Image.open(ROOT / webp.lstrip("/")) as web:
+                self.assertEqual(jpeg.size, (width, height))
+                self.assertEqual(web.size, (width, height))
+        self.assertNotIn("wondercon-xmen", home)
+        self.assertNotIn("X-Men", home)
+        self.assertFalse((ROOT / "img" / "talent" / "wondercon-xmen.jpg").exists())
+        self.assertFalse((ROOT / "img" / "talent" / "wondercon-xmen.webp").exists())
         self.assertIn("Not Anistar talent.", home)
-        self.assertIn("Convention cosplay at WonderCon 2019.", home)
+        self.assertIn("Violet Evergarden", home)
         for url in (
-            "https://commons.wikimedia.org/wiki/File:WonderCon_2019_-_90s_X-Men_(1)_(47451008372).jpg",
+            "https://commons.wikimedia.org/wiki/File:20251004_Cosplay_of_Violet_Evergarden_at_the_14th_Zhuhai_Animation_Show.jpg",
             "https://commons.wikimedia.org/wiki/File:Penciling_on_Wacom_Cintiq_13HD_by_David_Revoy.jpg",
             "https://commons.wikimedia.org/wiki/File:Melee_It_On_Me_-_Super_Smash_Bros._Melee_players_at_Evo_2014.jpg",
-            "https://creativecommons.org/licenses/by-sa/2.0/",
+            "https://creativecommons.org/licenses/by-sa/4.0/",
             "https://creativecommons.org/licenses/by/4.0/",
         ):
             self.assertIn(url, credits)
+        self.assertNotIn("WonderCon_2019_-_90s_X-Men", credits)
         self.assertIn("No model release is held by Anistar.", credits)
         self.assertIn("not an endorsement", credits)
 
